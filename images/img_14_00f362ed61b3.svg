@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
+    <defs><linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f4d4aa"/><stop offset="1" stop-color="#d8ece6"/></linearGradient></defs>
+    <rect width="1200" height="800" fill="url(#b)"/><ellipse cx="600" cy="650" rx="430" ry="95" fill="#b47a4c" opacity=".28"/>
+    <circle cx="610" cy="430" r="250" fill="#fff9ef"/><circle cx="610" cy="430" r="195" fill="#efb257"/>
+    <path d="M610 235L610 430 780 525" fill="#f7cf7c" stroke="#d88744" stroke-width="10"/><g fill="#c84439"><circle cx="520" cy="365" r="26"/><circle cx="685" cy="340" r="24"/><circle cx="705" cy="485" r="27"/><circle cx="510" cy="500" r="24"/></g>
+    <g fill="#2f8b67"><path d="M565 405q35-65 70 0q-35 35-70 0"/><path d="M615 520q38-65 75 5q-35 30-75-5"/></g>
+    <rect x="125" y="225" width="82" height="350" rx="35" fill="#e9f2f1"/><path d="M166 225v350M125 300h82" stroke="#7b9fa2" stroke-width="8"/>
+    <rect x="975" y="250" width="54" height="330" rx="20" fill="#17211d"/><path d="M930 250h145M946 210v90M1003 200v100M1060 210v90" stroke="#17211d" stroke-width="18" stroke-linecap="round"/>
+    </svg>

@@ -1,0 +1,28 @@
+{
+  "id": "./",
+  "name": "Helsinki Family Guide 2026",
+  "short_name": "Helsinki Guide",
+  "description": "Interaktiver Familien-Reiseführer für Helsinki vom 26. bis 28. Juli 2026 – mit Tagesplänen, Offline-Karten, Regenmodus, Restaurants und Reiseführer-Details.",
+  "lang": "de-DE",
+  "dir": "ltr",
+  "start_url": "./?source=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#f5f4ef",
+  "theme_color": "#0d7a62",
+  "categories": ["travel", "navigation", "lifestyle"],
+  "icons": [
+    {"src": "./icons/icon-96.png", "sizes": "96x96", "type": "image/png", "purpose": "any"},
+    {"src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "./icons/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable"},
+    {"src": "./icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ],
+  "shortcuts": [
+    {"name": "Sonntag", "short_name": "Sonntag", "description": "Ankommen, Hietalahti und optional Linnanmäki", "url": "./#tag1", "icons": [{"src": "./icons/icon-96.png", "sizes": "96x96"}]},
+    {"name": "Montag", "short_name": "Montag", "description": "Suomenlinna und Alte Markthalle", "url": "./#tag2", "icons": [{"src": "./icons/icon-96.png", "sizes": "96x96"}]},
+    {"name": "Dienstag", "short_name": "Dienstag", "description": "Felsenkirche, Oodi und Töölönlahti", "url": "./#tag3", "icons": [{"src": "./icons/icon-96.png", "sizes": "96x96"}]}
+  ]
+}
