@@ -1,4 +1,4 @@
-const CACHE_NAME = "helsinki-family-guide-v3-971ecae227f5";
+const CACHE_NAME = "helsinki-family-guide-v4-4f2a9c81b3d7";
 const PRECACHE = [
   "./icons/apple-touch-icon.png",
   "./icons/favicon-32.png",
@@ -42,7 +42,6 @@ const PRECACHE = [
 ];
 
 self.addEventListener('install', event => {
-  self.skipWaiting();
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(PRECACHE)));
 });
 
