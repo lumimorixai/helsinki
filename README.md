@@ -1,23 +1,38 @@
-# Helsinki Family Guide 2026 – PWA
+# Helsinki Family Guide · PWA V3
 
-Fertige Progressive Web App für GitHub Pages.
+Diese Version behebt die Navigation in der installierten PWA und erweitert den Reiseführer um genaue Spazierwege.
 
-## Veröffentlichung über GitHub Pages
+## Neu in V3
 
-1. Auf GitHub ein neues **öffentliches** Repository anlegen, beispielsweise `helsinki-family-guide`.
-2. Den Inhalt dieses Ordners in die oberste Ebene des Repositorys hochladen. `index.html`, `manifest.webmanifest` und `service-worker.js` müssen direkt im Root liegen.
-3. Im Repository **Settings → Pages** öffnen.
-4. Unter **Build and deployment** auswählen:
-   - Source: **Deploy from a branch**
-   - Branch: **main**
-   - Folder: **/(root)**
-5. Speichern und die von GitHub angezeigte Pages-Adresse öffnen.
-6. Auf dem iPhone die Adresse in **Safari** öffnen: **Teilen → Zum Home-Bildschirm**.
+- keine doppelte Logik aus „Kurzprofil“ und „Story“ mehr
+- robuste App-Navigation zu **Plan**, **Karte**, **Essen** und **HSL**
+- neue Sektion **Genaue Routen** mit vier offline lesbaren Schritt-für-Schritt-Wegen
+- Designroute mit konkreten Straßen, Abzweigungen und Blickaufträgen
+- öffentliche Torikorttelit-Innenhöfe statt unklarer Hinterhofhinweise
+- ausführlichere Reiseführer-Seiten mit Kontext, Blickpunkten, Routen und zusätzlichen Visualisierungen
+- aktualisierter Service Worker mit neuer Cache-Version
+
+## Veröffentlichung auf GitHub Pages
+
+1. Den vollständigen Inhalt dieses Ordners in das bestehende GitHub-Repository hochladen.
+2. Vorhandene Dateien überschreiben, insbesondere:
+   - `index.html`
+   - `404.html`
+   - `service-worker.js`
+   - `manifest.webmanifest`
+3. Den neuen Ordner `images/guide/` vollständig hochladen.
+4. GitHub Pages weiter aus `main` und `/(root)` veröffentlichen.
+
+## Bereits installierte iPhone-PWA aktualisieren
+
+Nach dem GitHub-Upload:
+
+1. Die öffentliche GitHub-Pages-Adresse einmal in Safari öffnen.
+2. Rund 10 Sekunden geöffnet lassen und anschließend neu laden.
+3. Danach die installierte App schließen und erneut öffnen.
+
+Der neue Service Worker löscht ältere `helsinki-family-guide-*`-Caches automatisch. Zeigt das iPhone trotzdem die alte Version, die Web-App einmal vom Home-Bildschirm entfernen und über Safari erneut hinzufügen.
 
 ## Offline-Verhalten
 
-Nach dem ersten vollständigen Laden werden HTML, Bilder, Icons und Offline-Karten gespeichert. Externe Ziele wie Apple Karten, HSL und Restaurant-Websites benötigen weiterhin Internet.
-
-## Aktualisierungen
-
-Neue Dateien einfach in GitHub ersetzen. Der Guide erkennt eine neue Service-Worker-Version und bietet ein Update an.
+Texte, Reiseführer-Details, Bilder, Routendiagramme und die Schrittfolgen werden offline gespeichert. Externe Live-Navigation, HSL-Echtzeitdaten und Restaurant-Websites benötigen eine Internetverbindung.

@@ -1,4 +1,4 @@
-const CACHE_NAME = "helsinki-family-guide-314ee3b7505d";
+const CACHE_NAME = "helsinki-family-guide-v3-971ecae227f5";
 const PRECACHE = [
   "./icons/apple-touch-icon.png",
   "./icons/favicon-32.png",
@@ -8,6 +8,13 @@ const PRECACHE = [
   "./icons/icon-96.png",
   "./icons/icon-maskable-192.png",
   "./icons/icon-maskable-512.png",
+  "./images/guide/design_details.svg",
+  "./images/guide/oldhall_details.svg",
+  "./images/guide/oodi_floors.svg",
+  "./images/guide/route_courtyards.svg",
+  "./images/guide/route_design.svg",
+  "./images/guide/route_suomenlinna.svg",
+  "./images/guide/route_toolo.svg",
   "./images/img_01_238bd9de3b6d.jpg",
   "./images/img_02_5456a07face0.jpg",
   "./images/img_03_878840d65107.jpg",
@@ -35,19 +42,35 @@ const PRECACHE = [
 ];
 
 self.addEventListener('install', event => {
+  self.skipWaiting();
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(PRECACHE)));
 });
 
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith('helsinki-family-guide-') && key !== CACHE_NAME).map(key => caches.delete(key))))
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(key => key.startsWith('helsinki-family-guide-') && key !== CACHE_NAME).map(key => caches.delete(key))))
       .then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('message', event => {
-  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
+  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
 });
+
+async function networkFirstNavigation(request) {
+  try {
+    const freshRequest = new Request(request, { cache: 'no-store' });
+    const response = await fetch(freshRequest);
+    if (response?.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      await cache.put('./index.html', response.clone());
+    }
+    return response;
+  } catch (error) {
+    return (await caches.match('./index.html')) || (await caches.match('./offline.html'));
+  }
+}
 
 self.addEventListener('fetch', event => {
   const request = event.request;
@@ -56,28 +79,22 @@ self.addEventListener('fetch', event => {
   if (url.origin !== self.location.origin) return;
 
   if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request)
-        .then(response => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
-          return response;
-        })
-        .catch(async () => (await caches.match(request)) || (await caches.match('./index.html')) || caches.match('./offline.html'))
-    );
+    event.respondWith(networkFirstNavigation(request));
     return;
   }
 
-  event.respondWith(
-    caches.match(request).then(cached => {
-      const network = fetch(request).then(response => {
-        if (response && response.status === 200) {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
-        }
-        return response;
-      }).catch(() => cached);
-      return cached || network;
-    })
-  );
+  event.respondWith((async () => {
+    const cached = await caches.match(request, { ignoreSearch: true });
+    if (cached) return cached;
+    try {
+      const response = await fetch(request);
+      if (response?.ok) {
+        const cache = await caches.open(CACHE_NAME);
+        cache.put(request, response.clone());
+      }
+      return response;
+    } catch (error) {
+      return new Response('', { status: 504, statusText: 'Offline' });
+    }
+  })());
 });
