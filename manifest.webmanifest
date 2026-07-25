@@ -5,7 +5,7 @@
   "description": "Ausführlicher Familien-Reiseführer für Helsinki mit exakten Spazierwegen, Offline-Routenkarten, Tagesplänen, Restaurants, HSL und Regenmodus.",
   "lang": "de-DE",
   "dir": "ltr",
-  "start_url": "./index.html?source=pwa&v=4",
+  "start_url": "./index.html?source=pwa&v=7",
   "scope": "./",
   "display": "standalone",
   "display_override": [
@@ -13,7 +13,7 @@
     "minimal-ui"
   ],
   "orientation": "any",
-  "background_color": "#f5f4ef",
+  "background_color": "#f4f5f3",
   "theme_color": "#0d7a62",
   "categories": [
     "travel",

@@ -1,4 +1,4 @@
-const CACHE_NAME = "helsinki-family-guide-v4-4f2a9c81b3d7";
+const CACHE_NAME = "helsinki-family-guide-v7-32e7e19415ac";
 const PRECACHE = [
   "./icons/apple-touch-icon.png",
   "./icons/favicon-32.png",
