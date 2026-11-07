@@ -59,7 +59,7 @@
   body.touch #joy, body.touch #jump{display:block}
   body.touch.flying #down{display:block}
   .overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(60,30,100,.35);backdrop-filter:blur(6px);padding:14px;z-index:10}
-  .card{background:#fff;border-radius:28px;padding:22px 20px;max-width:460px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(60,20,100,.35);max-height:92vh;overflow:auto}
+  .card{position:relative;background:#fff;border-radius:28px;padding:22px 20px;max-width:460px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(60,20,100,.35);max-height:92vh;overflow:auto}
   .card h1{margin:0 0 4px;font-size:32px;background:linear-gradient(90deg,#ff7bb0,#b58cff,#6ec3ff,#8ff0d2,#ffe066);-webkit-background-clip:text;background-clip:text;color:transparent}
   .card p{margin:8px 0 14px;font-size:17px}
   .card input,.card textarea{width:100%;font:800 18px 'Baloo 2',sans-serif;padding:11px 14px;border-radius:16px;border:3px solid #eadcff;text-align:center;color:var(--ink);outline:none;user-select:text;-webkit-user-select:text}
@@ -67,6 +67,8 @@
   .swatches{display:flex;gap:10px;justify-content:center;margin:12px 0 6px;flex-wrap:wrap}
   .sw{width:44px;height:44px;border-radius:50%;border:4px solid #eee;cursor:pointer}
   .sw.sel{border-color:var(--pink);transform:scale(1.15)}
+  .xbtn{position:absolute;top:10px;right:10px;width:38px;height:38px;border-radius:50%;border:0;background:#f1eaff;color:#8a7aa8;font:800 20px/1 'Baloo 2',sans-serif;cursor:pointer}
+  .xbtn:active{transform:scale(.95)}
   .lbl{font-size:14px;color:#8a7aa8;margin-top:10px}
   .hidden{display:none !important}
   .help{text-align:left;font-size:16px;line-height:1.45}
@@ -138,6 +140,7 @@
 
 <div id="start" class="overlay hidden">
   <div class="card">
+    <button class="xbtn hidden" id="startX" title="Schließen">✕</button>
     <h1>Einhorn-Blockwelt</h1>
     <p>Eine riesige Zauberwelt voller Dörfer, Ponys, Sterne und Geheimnisse. Lerne Zaubersprüche, baue, flieg – und finde den Schatz! 🌟</p>
     <input id="nameIn" maxlength="16" placeholder="Wie heißt dein Einhorn?" value="" autocomplete="off">
@@ -146,11 +149,13 @@
     <div class="lbl">Outfit <span style="font-size:12px">(mit Missionen freischalten)</span></div><div class="swatches" id="outfits"></div>
     <div class="row"><div class="tog" id="zombieTog">🧟 Zombie-Modus: <span id="zombieTogTxt">an</span></div><div class="tog" id="fsTog">📲 Vollbild / App</div></div>
     <button class="btn primary" id="go" style="font-size:22px;padding:14px 30px;margin-top:10px">Los geht's! 🦄</button>
+    <div class="row"><button class="btn small hidden" id="newGame">🔄 Neues Spiel (alles zurücksetzen)</button></div>
   </div>
 </div>
 
 <div id="dlg" class="overlay hidden">
   <div class="card">
+    <button class="xbtn" id="dlgX" title="Schließen">✕</button>
     <h1 id="dlgTitle" style="font-size:26px"></h1>
     <div id="dlgBody" class="help"></div>
     <div class="row" id="dlgRow"></div>
@@ -800,6 +805,8 @@ function toggleMusic(){ musicOn=!musicOn; toast(musicOn?'🎵 Musik an':'🔇 Mu
 // ================= UI helpers =================
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let toastT=null; function toast(msg,big){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.toggle('big',!!big); el.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),big?2800:1400); }
+function closeDlg(){ document.getElementById('dlg').classList.add('hidden'); }
+document.getElementById('dlgX').onclick=closeDlg; document.getElementById('dlg').addEventListener('pointerdown',e=>{ if(e.target===document.getElementById('dlg')) closeDlg(); });
 function dialog(title,html,buttons){ const d=document.getElementById('dlg'); document.getElementById('dlgTitle').innerHTML=title; document.getElementById('dlgBody').innerHTML=html; const row=document.getElementById('dlgRow'); row.innerHTML=''; buttons.forEach(([label,fn],i)=>{ const b=document.createElement('button'); b.className='btn'+(i===0?' primary':'')+(buttons.length>2?' small':''); b.textContent=label; b.onclick=()=>{ d.classList.add('hidden'); if(fn) fn(); }; row.appendChild(b); }); d.classList.remove('hidden'); }
 function helpText(){ return isTouch
  ? `<p><b>Laufen:</b> Joystick links 🕹️ · <b>Springen:</b> ⬆️<br><b>Fliegen:</b> 🕊️-Knopf drücken (oder in der Luft nochmal ⬆️) – dann ⬆️/⬇️ zum Steigen und Sinken. 🕊️ nochmal = landen.<br><b>Umschauen:</b> wischen · <b>Zoom:</b> zwei Finger<br><b>Bauen:</b> Block unten wählen und auf die Stelle tippen · <b>Abbauen:</b> lange drücken (oder ⛏️) – abgebaute Sachen landen im Rucksack 🎒<br><b>Dörfer 🏘️:</b> Sprich mit den Ponys! Die Bürgermeisterin (mit Hut 🎩) gibt dir eine Aufgabe und bringt dir einen Zauber bei.<br><b>🪄 Zaubern:</b> oben rechts · <b>🗺️ Karte:</b> zeigt Dörfer, Schloss und Berg<br><b>🎒 Rucksack & Kessel:</b> Gesammeltes ansehen, im Zauberkessel Zauber gegen Zombies brauen (Blütenschild, Schlaftrunk, Lichtblitz) oder eine Decke als Rüstung weben.<br><b>Stempel 🏠🌈:</b> ganz rechts in der Leiste · <b>↩️:</b> rückgängig<br><b>🧟 Nachts:</b> Zombies! Dreimal antippen besiegt sie. Schlaf im Bett 🛏️ (aus einem Haus mitnehmen, aufstellen, nachts antippen) – das speichert und überspringt die Nacht. Wirst du besiegt, verlierst du, was du seit dem letzten Schlafen gesammelt hast. Zombie-Modus lässt sich im Menü ausschalten.</p>`
@@ -843,7 +850,7 @@ function openMenu(){ dialog('Menü',`<div class="mgrid" id="mgrid"></div><p styl
     ['🌦️ Wetter & Zeit',()=>dialog('Wetter & Zeit','<p style="text-align:center">Wie soll das Wetter sein?</p>',[['☀️ Sonne',()=>setWeather('sonne')],['🌈 Glitzerregen',()=>setWeather('regen')],['❄️ Schnee',()=>setWeather('schnee')],[autoCycle?'🌗 Tag/Nacht automatisch: AN':'🌗 Tag/Nacht automatisch: AUS',()=>{ autoCycle=!autoCycle; save(); toast(autoCycle?'🌗 Tag und Nacht wechseln jetzt von selbst':'🌗 Du bestimmst Tag und Nacht'); }]])],
     [zombieMode?'🧟 Zombies: AN':'🧟 Zombies: AUS',()=>{ zombieMode=!zombieMode; updateHearts(); save(); toast(zombieMode?"🧟 Zombies kommen nachts – pass auf dich auf!":"🧟 Keine Zombies mehr – reines Bauen"); }],
     ['⚙️ Grafik',()=>dialog('Grafik','<p style="text-align:center">Wenn es ruckelt, stell hier runter.</p>',[['✨ Schön (Schatten, weite Sicht)',()=>{ setShadows(true); R=isTouch?3:4; save(); }],['⚡ Schnell (ohne Schatten)',()=>{ setShadows(false); R=isTouch?2:3; save(); }]])],
-    ['🌍 Welt-Code',shareDialog],['🦄 Einhorn ändern',()=>{ renderOutfits(); document.getElementById('start').classList.remove('hidden'); }],
+    ['🌍 Welt-Code',shareDialog],['🦄 Einhorn ändern',()=>{ renderOutfits(); document.getElementById('startX').classList.remove('hidden'); document.getElementById('start').classList.remove('hidden'); }],
     [tutorial<TUT.length?'⏭️ Tutorial überspringen':'🎓 Tutorial nochmal',()=>{ if(tutorial<TUT.length){ tutorial=TUT.length; tutBadge(); save(); toast('Tutorial übersprungen – viel Spaß!'); } else { teleportTo(0,7); setTimeout(()=>{ stats.metSternchen=0; stats.castBluehen=0; introStory(); },2500); } }],
     ['🏠 Nach Hause',()=>teleportTo(0,7)],['🔄 Alles neu',()=>dialog('Wirklich alles neu?','<p>Alle Bauten, Sterne, Missionen und Zauber werden gelöscht.</p>',[['Nein, behalten',null],['Ja, ganz neu',()=>{ try{ localStorage.removeItem('einhorn-blockwelt'); }catch(e){} location.reload(); }]])]
   ];
@@ -874,7 +881,9 @@ const sw=document.getElementById('swatches'); UNI_COLORS.forEach(([n,c])=>{ cons
 const hw=document.getElementById('horns'); HORN_COLORS.forEach(([n,c])=>{ const d=document.createElement('div'); d.className='sw'+(c===hornColor?' sel':''); d.style.background=c; d.title=n; d.onclick=()=>{ hornColor=c; [...hw.children].forEach(x=>x.classList.toggle('sel',x===d)); }; hw.appendChild(d); });
 function renderOutfits(){ const ow=document.getElementById('outfits'); ow.innerHTML=''; Object.entries(OUTFITS).forEach(([id,o])=>{ const d=document.createElement('div'); const ok=outfitUnlocked(id); d.className='sw'+(id===outfit?' sel':''); d.style.background=ok?'#fff0fa':'#eee'; d.style.display='flex'; d.style.alignItems='center'; d.style.justifyContent='center'; d.style.fontSize='22px'; d.textContent=ok?o.e:'🔒'; d.title=ok?o.n:`${o.n}: ab ${o.need} Missionen`; d.onclick=()=>{ if(!ok){ toast(`🔒 ${o.n}: ab ${o.need===99?'allen':o.need} Missionen`); return; } outfit=id; [...ow.children].forEach(x=>x.classList.toggle('sel',x===d)); }; ow.appendChild(d); }); }
 function renderZombieTog(){ document.getElementById('zombieTogTxt').textContent=zombieMode?'an':'aus'; } renderZombieTog(); document.getElementById('zombieTog').onclick=()=>{ zombieMode=!zombieMode; renderZombieTog(); updateHearts(); save(); };
-renderOutfits(); document.getElementById('nameIn').value=uniName==='Einhorn'?'':uniName; document.getElementById('starcount').textContent=collected.size; refreshPalette();
+renderOutfits(); document.getElementById('nameIn').value=uniName==='Einhorn'?'':uniName;
+if(saved){ document.getElementById('newGame').classList.remove('hidden'); } document.getElementById('newGame').onclick=()=>{ dialog('🔄 Neues Spiel?','<p>Alles wird zurückgesetzt: Bauten, Sterne, Missionen, Zauber und der Rucksack. Das Tutorial startet neu.</p>',[['Abbrechen',null],['Ja, ganz neu',()=>{ try{ localStorage.removeItem('einhorn-blockwelt'); }catch(e){} location.reload(); }]]); };
+document.getElementById('startX').onclick=()=>{ document.getElementById('start').classList.add('hidden'); }; document.getElementById('starcount').textContent=collected.size; refreshPalette();
 document.getElementById('nameIn').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('go').click(); } });
 document.getElementById('go').onclick=()=>{ uniName=(document.getElementById('nameIn').value.trim()||'Einhorn').slice(0,16); document.getElementById('pname').textContent='🦄 '+uniName; buildUnicorn(uniColor,hornColor); save(); document.getElementById('start').classList.add('hidden'); document.getElementById('hud').classList.remove('hidden'); sfx('magic'); if(musicOn) startMusic();
   if(!started){ started=true; if(tutorial>=TUT.length) toast('Willkommen zurück! 🌟',true); else if(tutorial===0 && !stats.introSeen){ stats.introSeen=1; setTimeout(introStory,600); } else { tutShown=-1; setTimeout(tutorialTick,1200); } } };
