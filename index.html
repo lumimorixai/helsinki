@@ -160,7 +160,7 @@
   <div class="card">
     <button class="xbtn hidden" id="startX" title="Schließen">✕</button>
     <h1>Einhorn-Blockwelt</h1>
-    <div style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 7.0</div>
+    <div style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 7.1</div>
     <p>Eine riesige Zauberwelt voller Dörfer, Ponys, Sterne und Geheimnisse. Lerne Zaubersprüche, baue, flieg – und finde den Schatz! 🌟</p>
     <input id="nameIn" maxlength="16" placeholder="Wie heißt dein Einhorn?" value="" autocomplete="off">
     <div class="lbl">Fellfarbe</div><div class="swatches" id="swatches"></div>
@@ -169,6 +169,7 @@
     <div class="row"><div class="tog" id="zombieTog">🧟 Zombie-Modus: <span id="zombieTogTxt">an</span></div><div class="tog" id="fsTog">📲 Vollbild / App</div></div>
     <button class="btn primary" id="go" style="font-size:22px;padding:14px 30px;margin-top:10px">Los geht's! 🦄</button>
     <div class="row"><button class="btn small hidden" id="newGame">🔄 Neues Spiel (alles zurücksetzen)</button></div>
+    <div style="margin-top:14px;font-size:12px;color:#8a7aa8;line-height:1.4">🛡️ <b>Für Eltern:</b> kein Chat, keine Käufe, keine Werbung, keine Konten. Alles wird nur auf diesem Gerät gespeichert. <a href="#" id="elternInfo" style="color:#a05fd0">Mehr</a></div>
   </div>
 </div>
 
@@ -1083,6 +1084,7 @@ function renderOutfits(){ const ow=document.getElementById('outfits'); ow.innerH
 function renderZombieTog(){ document.getElementById('zombieTogTxt').textContent=zombieMode?'an':'aus'; } renderZombieTog(); document.getElementById('zombieTog').onclick=()=>{ zombieMode=!zombieMode; renderZombieTog(); updateHearts(); save(); };
 renderOutfits(); document.getElementById('nameIn').value=uniName==='Einhorn'?'':uniName;
 if(saved){ document.getElementById('newGame').classList.remove('hidden'); } document.getElementById('newGame').onclick=()=>{ dialog('🔄 Neues Spiel?','<p>Alles wird zurückgesetzt: Bauten, Sterne, Missionen, Zauber und der Rucksack. Das Tutorial startet neu.</p>',[['Abbrechen',null],['Ja, ganz neu',hardReset]]); };
+document.getElementById('elternInfo').onclick=(e)=>{ e.preventDefault(); dialog('🛡️ Infos für Eltern',`<p><b>Was das Spiel ist:</b> ein offenes Bau‑ und Entdeckerspiel für Kinder ab etwa 8 Jahren – ohne Waffen, ohne Zeitdruck, ohne Verlieren‑Zwang.</p><p><b>Sicherheit:</b> Es gibt keinen Chat, keine Fremden, keine In‑App‑Käufe, keine Werbung, keine Anmeldung und keine Datenerhebung. Das Spiel läuft komplett im Browser; der Spielstand liegt ausschließlich auf diesem Gerät.</p><p><b>Zombies:</b> Nachts erscheinen comichafte Zombies, die man mit Zaubern vertreibt oder durch Schlafen im Bett meidet. Sie lassen sich in den Einstellungen jederzeit ausschalten – dann ist es ein reines Kreativspiel.</p><p><b>Spielzeit:</b> Es gibt keine Belohnungen fürs Dranbleiben und keine Benachrichtigungen. Ein Spieltag dauert etwa 10 Minuten – eine gute natürliche Pause.</p><p><b>Teilen:</b> Über „Welt teilen“ entsteht ein Text‑Code mit den Bauten; er enthält keine persönlichen Daten.</p>`,[['Alles klar',null]]); };
 document.getElementById('startX').onclick=()=>{ document.getElementById('start').classList.add('hidden'); }; document.getElementById('starcount').textContent=collected.size; refreshPalette();
 document.getElementById('nameIn').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('go').click(); } });
 document.getElementById('go').onclick=()=>{ if(night||dayTime>0.65) { dayTime=0.3; applySky(); } uniName=(document.getElementById('nameIn').value.trim()||'Einhorn').slice(0,16); document.getElementById('pname').textContent='🦄 '+uniName; buildUnicorn(uniColor,hornColor); save(); document.getElementById('start').classList.add('hidden'); document.getElementById('hud').classList.remove('hidden'); sfx('magic'); if(musicOn) startMusic();

@@ -2,7 +2,7 @@
 
 Ein Block-Bauspiel für Kinder: endlose Welt mit Dörfern, Pony-Bewohnern, Quests, Zaubersprüchen, Fliegen, Tag/Nacht, optionalen Zombies und einem Zauberkessel zum Craften.
 
-**Spielen / als App installieren:** https://lumimorixai.github.io/helsinki/
+**Spielen / als App installieren:** https://lumimorixai.github.io/einhorn-blockwelt/
 
 - iPhone/iPad: in Safari öffnen → Teilen → „Zum Home-Bildschirm“
 - Android: in Chrome öffnen → ⋮ → „App installieren“
