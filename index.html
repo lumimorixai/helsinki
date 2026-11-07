@@ -45,7 +45,7 @@
   #modebar{display:flex;gap:8px;align-items:center}
   #mode{min-width:140px}
   #mode.remove{background:linear-gradient(135deg,#ffb36b,#ff6f91);color:#fff}
-  #toast{position:fixed;left:50%;top:calc(var(--sat) + 110px);transform:translateX(-50%);background:rgba(255,255,255,.93);padding:9px 18px;border-radius:16px;font-weight:800;opacity:0;transition:opacity .3s;box-shadow:0 6px 18px rgba(80,40,120,.2);pointer-events:none;white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis;z-index:5}
+  #toast{position:fixed;left:50%;bottom:calc(var(--sab) + 132px);transform:translateX(-50%);background:rgba(255,255,255,.93);padding:9px 18px;border-radius:16px;font-weight:800;opacity:0;transition:opacity .3s;box-shadow:0 6px 18px rgba(80,40,120,.2);pointer-events:none;white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis;z-index:5}
   #toast.show{opacity:1}
   #toast.big{background:linear-gradient(135deg,#fff3a0,#ffd1e8);font-size:19px}
   #joy{position:fixed;left:calc(var(--sal) + 18px);bottom:calc(var(--sab) + 150px);width:134px;height:134px;border-radius:50%;background:rgba(255,255,255,.35);border:3px solid rgba(255,255,255,.7);display:none;touch-action:none}
@@ -89,7 +89,7 @@
   .mgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .mgrid .btn{min-height:44px;font-size:15px;padding:10px 8px}
   #mapc{width:100%;max-width:360px;border-radius:18px;image-rendering:pixelated;background:#9fd}
-  @media (max-height:460px){ #joy{width:104px;height:104px;bottom:calc(var(--sab) + 84px);left:calc(var(--sal) + 12px)} #knob{width:46px;height:46px;margin:-23px} #jump{width:62px;height:62px;font-size:26px;bottom:calc(var(--sab) + 96px);right:calc(var(--sar) + 12px)} #flyBtn{width:50px;height:50px;font-size:22px;bottom:calc(var(--sab) + 100px);right:calc(var(--sar) + 84px)} #down{width:50px;height:50px;font-size:22px;bottom:calc(var(--sab) + 168px);right:calc(var(--sar) + 18px)} .pal{width:40px;height:40px;font-size:19px;border-radius:11px} #palette{padding:4px;gap:6px;max-width:60vw} #bottom{flex-direction:row;align-items:flex-end;justify-content:center;gap:6px;bottom:calc(var(--sab) + 6px)} #mode{min-width:0;padding:10px 12px;font-size:15px;min-height:42px} #bUndo{width:42px;height:42px} .btn.round{width:40px;height:40px;font-size:18px} .badge{font-size:13px;padding:4px 10px} #compass{font-size:12px} #top{top:calc(var(--sat) + 6px)} #toast{top:calc(var(--sat) + 60px);font-size:14px} }
+  @media (max-height:460px){ #joy{width:104px;height:104px;bottom:calc(var(--sab) + 84px);left:calc(var(--sal) + 12px)} #knob{width:46px;height:46px;margin:-23px} #jump{width:62px;height:62px;font-size:26px;bottom:calc(var(--sab) + 96px);right:calc(var(--sar) + 12px)} #flyBtn{width:50px;height:50px;font-size:22px;bottom:calc(var(--sab) + 100px);right:calc(var(--sar) + 84px)} #down{width:50px;height:50px;font-size:22px;bottom:calc(var(--sab) + 168px);right:calc(var(--sar) + 18px)} .pal{width:40px;height:40px;font-size:19px;border-radius:11px} #palette{padding:4px;gap:6px;max-width:60vw} #bottom{flex-direction:row;align-items:flex-end;justify-content:center;gap:6px;bottom:calc(var(--sab) + 6px)} #mode{min-width:0;padding:10px 12px;font-size:15px;min-height:42px} #bUndo{width:42px;height:42px} .btn.round{width:40px;height:40px;font-size:18px} .badge{font-size:13px;padding:4px 10px} #compass{font-size:12px} #top{top:calc(var(--sat) + 6px)} #toast{bottom:calc(var(--sab) + 64px);font-size:14px} }
   @media (max-width:520px){ .btn.round{width:44px;height:44px;font-size:19px} #tools{gap:6px;max-width:60%} .badge{font-size:14px;padding:6px 10px} #compass{font-size:13px} }
   .nlabel{position:fixed;left:0;top:0;transform:translate(-50%,-100%);background:rgba(255,255,255,.85);border-radius:12px;padding:3px 9px;font-size:13px;font-weight:800;pointer-events:none;white-space:nowrap;display:none;box-shadow:0 2px 6px rgba(80,40,120,.2)}
   .nlabel.q{background:linear-gradient(135deg,#fff3a0,#ffd1e8)}
@@ -111,6 +111,7 @@
       <div class="badge"><span id="pname">🦄 Einhorn</span><span class="stars">🌟 <span id="starcount">0</span></span><span id="hearts" class="hidden"></span></div>
       <div class="badge" id="compass"><span id="arrow">⬆️</span><span id="compassTxt">Stern</span><span id="place"></span></div>
       <div class="badge hidden" id="race">🏁 <span id="raceTxt"></span></div>
+      <div class="badge hidden" id="tut" style="font-size:13px;padding:5px 11px;max-width:min(78vw,420px);white-space:normal;line-height:1.25;background:linear-gradient(135deg,#fff3a0,#ffd1e8)"></div>
       <div class="badge hidden" id="buff" style="font-size:13px;padding:4px 10px"></div>
     </div>
     <div id="tools">
@@ -524,7 +525,7 @@ const uni=new THREE.Group(); scene.add(uni); let legs=[],maneCubes=[],tailCubes=
 function overlapsSolid(px,py,pz){ const x0=Math.round(px-P.w),x1=Math.round(px+P.w),y0=Math.round(py),y1=Math.round(py+P.h),z0=Math.round(pz-P.w),z1=Math.round(pz+P.w); for(let x=x0;x<=x1;x++) for(let y=y0;y<=y1;y++) for(let z=z0;z<=z1;z++){ if(!isSolid(get(x,y,z))) continue; if(x+0.5>px-P.w && x-0.5<px+P.w && y+0.5>py && y-0.5<py+P.h && z+0.5>pz-P.w && z-0.5<pz+P.w) return true; } return false; }
 function playerIntersects(bx,by,bz){ return bx+0.5>P.x-P.w && bx-0.5<P.x+P.w && by+0.5>P.y && by-0.5<P.y+P.h && bz+0.5>P.z-P.w && bz-0.5<P.z+P.w; }
 function spawnPlayer(x,z){ x=x==null?0:x; z=z==null?7:z; let r=0, bx=x, bz=z; const free=(a,b)=>{ const h=topY(a,b); if(h<=SEA) return false; for(let y=h+1;y<=h+4;y++) if(get(a,y,b)&&isSolid(get(a,y,b))) return false; return true; }; while(!free(bx,bz)&&r<300){ r++; const rad=Math.ceil(r/8), ang=r*0.9; bx=Math.round(x+Math.cos(ang)*rad); bz=Math.round(z+Math.sin(ang)*rad); } P.x=bx; P.z=bz; P.y=topY(bx,bz)+0.51; P.vx=P.vy=P.vz=0; setFlying(false); }
-function setFlying(v){ P.flying=v; document.body.classList.toggle('flying',v); wings.forEach(w=>w.visible=v); if(v){ sfx('wings'); mission('fly'); } }
+function setFlying(v){ if(v) stats.flew=1; P.flying=v; document.body.classList.toggle('flying',v); wings.forEach(w=>w.visible=v); if(v){ sfx('wings'); mission('fly'); } }
 
 // ================= NPCs =================
 const npcs=[]; // {v, def, U, x,y,z, yaw, t, home}
@@ -663,7 +664,7 @@ function doAction(nd,forceRemove){ if(!playing()) return; if(!forceRemove && (ta
   if(rem){ if(hit.y<=1){ toast('Ganz unten geht nicht 🙈'); return; } const inf=B[hit.type]; applyChanges([[hit.x,hit.y,hit.z,0]]); const drops=dropFor(hit.type); let msg=[]; for(const [it,n] of drops){ addItem(it,n); msg.push(`${ITEM_NAMES[it]||it} ${inv[it]}`); if(it==='bett') refreshPalette(); } if(msg.length) toast('🎒 '+msg.join(' · ')); if(drops.some(d=>d[0]==='diamant'||d[0]==='apfel')) sfx('star'); spawn(hit.x,hit.y,hit.z,[inf.rainbow?RAINBOW[0]:inf.c,'#ffffff'],14,2.5,2,0.7); sfx('remove'); }
   else if(curStamp){ placeStamp(hit); return; }
   else { const px=hit.x+hit.nx, py=hit.y+hit.ny, pz=hit.z+hit.nz; if(py<1||py>=CHY-1) return; const existing=get(px,py,pz); if(existing && !B[existing].cross && existing!==T.WASSER) return; if(isSolid(curBlock) && playerIntersects(px,py,pz)){ toast('Da stehst du gerade 🦄'); return; }
-    if(curBlock===T.BETT){ if(!(inv.bett>0)){ toast('Du hast kein Bett im Rucksack – hol dir eins aus einem Haus 🏠'); return; } inv.bett--; refreshPalette(); if(inv.bett<=0) selectBlock(T.REGEN); toast('🛏️ Bett aufgestellt – nachts antippen zum Schlafen'); }
+    if(curBlock===T.BETT){ if(!(inv.bett>0)){ toast('Du hast kein Bett im Rucksack – hol dir eins aus einem Haus 🏠'); return; } inv.bett--; stats.bedPlaced=(stats.bedPlaced||0)+1; refreshPalette(); if(inv.bett<=0) selectBlock(T.REGEN); toast('🛏️ Bett aufgestellt – nachts antippen zum Schlafen'); }
     applyChanges([[px,py,pz,curBlock]]); const inf=B[curBlock]; spawn(px,py+0.3,pz,inf.rainbow?RAINBOW:[inf.c,'#ffffff'],10,1.5,1.5,0.6); sfx('place'); stats.placed++; mission('first'); if(stats.placed>=100) mission('builder'); }
   saveSoon(); }
 function toggleMode(){ removeMode=!removeMode; const b=document.getElementById('mode'); b.textContent=removeMode?'⛏️ Abbauen':'🧱 Bauen'; b.classList.toggle('remove',removeMode); hl.material.color.set(removeMode?0xff7070:0xffffff); }
@@ -703,7 +704,7 @@ const SPELLS={
 };
 const SPELL_ORDER=['glitzer','bluehen','bruecke','frost','wachsen','teleport','sternenruf'];
 let spells=new Set(['glitzer']), lastSpell='glitzer'; const tempBlocks=[];
-function castSpell(id){ if(!spells.has(id)){ toast('🔒 Diesen Zauber kennst du noch nicht'); return; } lastSpell=id; stats.casts++; if(stats.casts>=10) mission('magic'); const hx=P.x+Math.sin(P.yaw)*0.6, hy=P.y+2.1, hz=P.z+Math.cos(P.yaw)*0.6;
+function castSpell(id){ if(!spells.has(id)){ toast('🔒 Diesen Zauber kennst du noch nicht'); return; } lastSpell=id; stats.casts++; if(id==='bluehen') stats.castBluehen=1; if(stats.casts>=10) mission('magic'); const hx=P.x+Math.sin(P.yaw)*0.6, hy=P.y+2.1, hz=P.z+Math.cos(P.yaw)*0.6;
   if(id==='glitzer'){ spawn(hx,hy,hz,RAINBOW,140,5,5,1.4); sfx('magic'); }
   else if(id==='bluehen'){ const L=[]; for(let i=0;i<24;i++){ const a=Math.random()*Math.PI*2, r=1.5+Math.random()*4; const x=Math.round(P.x+Math.cos(a)*r), z=Math.round(P.z+Math.sin(a)*r); const y=topY(x,z); if(get(x,y,z)===T.GRAS && !get(x,y+1,z)) L.push([x,y+1,z,Math.random()<0.7?T.BLUME:T.TUFT]); } applyChanges(L); spawn(P.x,P.y+1,P.z,FLOWER,80,8,3,1.5); sfx('magic'); }
   else if(id==='bruecke'){ const dx=-Math.sin(camYaw), dz=-Math.cos(camYaw); const L=[]; const by=Math.round(P.y-0.5)-1; for(let i=1;i<=14;i++){ const cx=P.x+dx*i, cz=P.z+dz*i; for(let w=-1;w<=1;w++){ const x=Math.round(cx+dz*w*0.7), z=Math.round(cz-dx*w*0.7); if(!get(x,by,z)) L.push([x,by,z,T.REGEN]); } } const n=applyChanges(L); if(n){ tempBlocks.push({t:performance.now()+30000,list:L}); } spawn(P.x+dx*3,P.y+1,P.z+dz*3,RAINBOW,80,6,3,1.5); sfx('magic'); }
@@ -729,7 +730,7 @@ const QUESTS=[ // index by village.questIdx
 ];
 let questsDone=new Set();
 function questHintFor(spell){ const i=QUESTS.findIndex(q=>q.reward===spell); return i<0?'':`Bürgermeisterin mit Quest ${i+1} finden (${ITEM_NAMES[QUESTS[i].item]})`; }
-function talkNpc(n){ const v=n.v, def=n.def; const q=QUESTS[v.questIdx]; const name=def.name; sfx('mission'); spawn(n.x,n.y+1.8,n.z,['#ffd1e8','#ffffff','#fff3a0'],20,1.5,1.5,0.8);
+function talkNpc(n){ const v=n.v, def=n.def; if(def.name==='Sternchen') stats.metSternchen=1; const q=QUESTS[v.questIdx]; const name=def.name; sfx('mission'); spawn(n.x,n.y+1.8,n.z,['#ffd1e8','#ffffff','#fff3a0'],20,1.5,1.5,0.8);
   if(def.mayor){ const qid=v.id+':'+v.questIdx; const greet=name==='Sternchen'?`Hallo ${esc(uniName)}! Ich bin Sternchen, die Bürgermeisterin von Sternendorf.`:`Willkommen in ${esc(v.name)}, ${esc(uniName)}! Ich bin ${esc(name)}, die Bürgermeisterin.`;
     if(questsDone.has(qid)){ const hints=npcHints(); dialog(`🦄 ${esc(name)}`,`<p style="text-align:center">„${greet} Danke nochmal für deine Hilfe! ${esc(hints[Math.floor(Math.random()*hints.length)])}“</p>`,[['Bis bald!',null]]); return; }
     const have=inv[q.item]||0; const enough=have>=q.n;
@@ -768,7 +769,7 @@ function outfitUnlocked(id){ return missionsDone()>=OUTFITS[id].need || (id==='k
 function mission(id){ if(done.has(id)) return; done.add(id); saveSoon(); const m=MISSIONS.find(x=>x[0]===id); if(m){ toast(`${m[1]} Mission geschafft: ${m[3]}!`,true); sfx('mission'); spawn(P.x,P.y+1.5,P.z,RAINBOW,40,3,3,1); }
   const n=missionsDone(); const unlocked=Object.entries(OUTFITS).find(([k,o])=>o.need===n&&k!=='none'&&k!=='krone'); if(unlocked) setTimeout(()=>{ toast(`${unlocked[1].e} Neues Outfit: ${unlocked[1].n}! (Menü → Einhorn ändern)`,true); sfx('fanfare'); },2800);
   if(MISSIONS.every(x=>done.has(x[0])) && !done.has('all')){ done.add('all'); saveSoon(); setTimeout(()=>{ outfit='krone'; buildUnicorn(uniColor,hornColor); sfx('fanfare'); for(let i=0;i<8;i++) setTimeout(()=>spawn(P.x,P.y+2,P.z,RAINBOW,80,8,7,2),i*250); dialog('👑 Alle Missionen geschafft!',`<p style="text-align:center">Unglaublich, ${esc(uniName)}! Du hast jede einzelne Mission gemeistert.<br><br>Dafür bekommst du die <b>goldene Einhorn-Krone</b> 👑✨</p>`,[['Juhu! 🦄',null]]); },600); } }
-function showMissions(){ const html='<div class="missions">'+MISSIONS.map(([id,ic,txt])=>`<div class="m ${done.has(id)?'done':''}"><span class="ic">${done.has(id)?'✅':ic}</span><span>${txt}</span></div>`).join('')+'</div>'+(done.has('all')?'<p style="text-align:center">👑 Du trägst die Einhorn-Krone!</p>':`<p style="text-align:center;font-size:14px">${missionsDone()} von ${MISSIONS.length} geschafft – Outfits gibt es bei 4, 8 und 12, am Ende die Krone 👑</p>`); dialog('📜 Missionen',html,[['Weiter!',null]]); }
+function showMissions(){ const html='<div class="m" style="background:linear-gradient(135deg,#fff3a0,#ffd1e8)"><span class="ic">🎯</span><span><b>Dein großes Ziel:</b> Hilf den Dörfern, lerne alle 6 Zauber, finde den Schatz im Schneeberg – und werde mit allen Missionen zur Einhorn‑Königin 👑</span></div><div class="missions">'+MISSIONS.map(([id,ic,txt])=>`<div class="m ${done.has(id)?'done':''}"><span class="ic">${done.has(id)?'✅':ic}</span><span>${txt}</span></div>`).join('')+'</div>'+(done.has('all')?'<p style="text-align:center">👑 Du trägst die Einhorn-Krone!</p>':`<p style="text-align:center;font-size:14px">${missionsDone()} von ${MISSIONS.length} geschafft – Outfits gibt es bei 4, 8 und 12, am Ende die Krone 👑</p>`); dialog('📜 Missionen',html,[['Weiter!',null]]); }
 function buildUnicorn(color,horn){ while(uni.children.length) uni.remove(uni.children[0]); rainbowFur=/regenbogen|rainbow/i.test(uniName); if(!outfitUnlocked(outfit)) outfit='none'; const U=makeUnicorn(color,horn,outfit,{armor}); uni.add(U.g); legs=U.legs; maneCubes=U.mane; tailCubes=U.tail; wings=U.wings; crown=U.crown; wings.forEach(w=>w.visible=P.flying); }
 
 // ================= Race =================
@@ -843,6 +844,7 @@ function openMenu(){ dialog('Menü',`<div class="mgrid" id="mgrid"></div><p styl
     [zombieMode?'🧟 Zombies: AN':'🧟 Zombies: AUS',()=>{ zombieMode=!zombieMode; updateHearts(); save(); toast(zombieMode?"🧟 Zombies kommen nachts – pass auf dich auf!":"🧟 Keine Zombies mehr – reines Bauen"); }],
     ['⚙️ Grafik',()=>dialog('Grafik','<p style="text-align:center">Wenn es ruckelt, stell hier runter.</p>',[['✨ Schön (Schatten, weite Sicht)',()=>{ setShadows(true); R=isTouch?3:4; save(); }],['⚡ Schnell (ohne Schatten)',()=>{ setShadows(false); R=isTouch?2:3; save(); }]])],
     ['🌍 Welt-Code',shareDialog],['🦄 Einhorn ändern',()=>{ renderOutfits(); document.getElementById('start').classList.remove('hidden'); }],
+    [tutorial<TUT.length?'⏭️ Tutorial überspringen':'🎓 Tutorial nochmal',()=>{ if(tutorial<TUT.length){ tutorial=TUT.length; tutBadge(); save(); toast('Tutorial übersprungen – viel Spaß!'); } else { teleportTo(0,7); setTimeout(()=>{ stats.metSternchen=0; stats.castBluehen=0; introStory(); },2500); } }],
     ['🏠 Nach Hause',()=>teleportTo(0,7)],['🔄 Alles neu',()=>dialog('Wirklich alles neu?','<p>Alle Bauten, Sterne, Missionen und Zauber werden gelöscht.</p>',[['Nein, behalten',null],['Ja, ganz neu',()=>{ try{ localStorage.removeItem('einhorn-blockwelt'); }catch(e){} location.reload(); }]])]
   ];
   const g=document.getElementById('mgrid'); items.forEach(([l,fn])=>{ const b=document.createElement('button'); b.className='btn'; b.textContent=l; b.onclick=()=>{ document.getElementById('dlg').classList.add('hidden'); if(fn) fn(); }; g.appendChild(b); }); }
@@ -875,11 +877,28 @@ function renderZombieTog(){ document.getElementById('zombieTogTxt').textContent=
 renderOutfits(); document.getElementById('nameIn').value=uniName==='Einhorn'?'':uniName; document.getElementById('starcount').textContent=collected.size; refreshPalette();
 document.getElementById('nameIn').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('go').click(); } });
 document.getElementById('go').onclick=()=>{ uniName=(document.getElementById('nameIn').value.trim()||'Einhorn').slice(0,16); document.getElementById('pname').textContent='🦄 '+uniName; buildUnicorn(uniColor,hornColor); save(); document.getElementById('start').classList.add('hidden'); document.getElementById('hud').classList.remove('hidden'); sfx('magic'); if(musicOn) startMusic();
-  if(!started){ started=true; if(tutorial>=TUT.length) toast('Willkommen zurück! 🌟',true); else setTimeout(tutorialTick,1200); } };
-const TUT=[isTouch?'Lauf los! Schieb den Joystick unten links 🕹️':'Lauf los! Mit W A S D oder den Pfeiltasten 🏃','Super! Tippe auf den Boden, um einen Block zu bauen 🧱','Toll! Der Kompass oben links zeigt zum nächsten Stern 🌟','Sternchen 🦄 (mit Hut) steht am Dorfbrunnen – tipp sie an, sie hat eine Aufgabe für dich!'];
-let tutShown=-1; const tutStart={x:0,z:0};
-function tutorialTick(){ if(tutorial>=TUT.length) return; if(tutShown!==tutorial){ tutShown=tutorial; toast(TUT[tutorial],true); } if(tutorial===0 && Math.hypot(P.x-tutStart.x,P.z-tutStart.z)>3){ tutorial=1; tutShown=-1; saveSoon(); setTimeout(tutorialTick,400); } else if(tutorial===1 && stats.placed>0){ tutorial=2; tutShown=-1; saveSoon(); setTimeout(tutorialTick,1500); } else if(tutorial===2 && collected.size>0){ tutorial=3; tutShown=-1; saveSoon(); setTimeout(tutorialTick,2500); } else if(tutorial===3 && questsDone.size>0){ tutorial=4; saveSoon(); } }
-try{ if('serviceWorker' in navigator && window.top===window.self && location.protocol==='https:'){ navigator.serviceWorker.register('sw.js').catch(()=>{}); } }catch(e){}
+  if(!started){ started=true; if(tutorial>=TUT.length) toast('Willkommen zurück! 🌟',true); else if(tutorial===0 && !stats.introSeen){ stats.introSeen=1; setTimeout(introStory,600); } else { tutShown=-1; setTimeout(tutorialTick,1200); } } };
+const TUT=[
+  {t:'Lauf los! '+(isTouch?'Schieb den Joystick unten links. 🕹️':'Drück W A S D oder die Pfeiltasten. 🏃'), check:()=>Math.hypot(P.x-tutStart.x,P.z-tutStart.z)>3},
+  {t:'Schau dich um: '+(isTouch?'Wisch mit einem Finger über den Bildschirm. 👆':'Zieh mit gedrückter Maustaste. 🖱️'), check:()=>Math.abs(camYaw-tutStart.yaw)>0.5},
+  {t:'Geh zu Sternchen 🎩 am Dorfbrunnen und tipp sie an – sie hat eine Aufgabe für dich.', target:()=>{ const n=npcs.find(n=>n.def.name==='Sternchen'); return n?{x:n.x,y:n.y,z:n.z}:null; }, check:()=>!!stats.metSternchen},
+  {t:'Pflücke 5 Blumen 🌸 – '+(isTouch?'lange auf eine Blume drücken.':'Rechtsklick auf eine Blume.')+' Sie landen im Rucksack 🎒.', target:()=>nearestBlock(T.BLUME,24), check:()=>(inv.blume||0)>=5||questsDone.has('0,0:0')},
+  {t:'Bring die Blumen zu Sternchen 🎩 zurück und tipp auf „Abgeben" – sie bringt dir einen Zauber bei!', target:()=>{ const n=npcs.find(n=>n.def.name==='Sternchen'); return n?{x:n.x,y:n.y,z:n.z}:null; }, check:()=>questsDone.has('0,0:0')},
+  {t:'Zaubere! Tipp oben rechts auf 🪄 und wähle 🌸 Blühen.', check:()=>!!stats.castBluehen},
+  {t:'Bau etwas: Wähle unten einen Block und tipp auf den Boden. 🧱 (↩️ macht es rückgängig)', check:()=>stats.placed>0},
+  {t:'Flieg! '+(isTouch?'Tipp auf 🕊️.':'Drück die Taste G.')+' Mit '+(isTouch?'⬆️/⬇️':'Leertaste/Shift')+' steigst und sinkst du.', check:()=>!!stats.flew},
+  {t:'Fang einen Stern 🌟 – der Kompass oben zeigt dir den Weg (hinlaufen oder hinfliegen).', check:()=>collected.size>0},
+  {t:'Bevor es Nacht wird: Hol dir ein Bett 🛏️ aus einem Haus (abbauen = lange drücken) und stell es irgendwo auf. Nachts antippen = sicher schlafen.', target:()=>nearestBlock(T.BETT,40), check:()=>(inv.bett>0)||(stats.bedPlaced>0)}
+];
+let tutShown=-1; const tutStart={x:0,z:0,yaw:0}; let nbCache={t:0,v:null,type:0};
+function nearestBlock(type,rad){ if(performance.now()-nbCache.t<1500 && nbCache.type===type) return nbCache.v; let best=null,bd=1e9; const px=Math.round(P.x),pz=Math.round(P.z); for(let x=px-rad;x<=px+rad;x+=1) for(let z=pz-rad;z<=pz+rad;z+=1){ const d=Math.hypot(x-P.x,z-P.z); if(d>bd) continue; const top=topYData(x,z); for(let y=Math.max(1,top-2);y<=top+3;y++){ if(get(x,y,z)===type){ bd=d; best={x,y,z}; break; } } } nbCache={t:performance.now(),v:best,type}; return best; }
+function tutBadge(){ const el=document.getElementById('tut'); if(tutorial>=TUT.length){ el.classList.add('hidden'); return; } el.classList.remove('hidden'); el.innerHTML=`<b>Schritt ${tutorial+1}/${TUT.length}:</b> ${TUT[tutorial].t}`; }
+function tutorialTick(){ if(tutorial>=TUT.length){ document.getElementById('tut').classList.add('hidden'); return; } if(tutShown!==tutorial){ tutShown=tutorial; tutBadge(); } if(TUT[tutorial].check()){ sfx('mission'); spawn(P.x,P.y+1.5,P.z,['#fff3a0','#ffffff'],25,2,2,0.8); tutorial++; saveSoon(); if(tutorial>=TUT.length){ tutBadge(); setTimeout(tutorialDone,600); } else { toast('✅ Geschafft! Nächster Schritt …'); setTimeout(()=>{ tutShown=-1; tutorialTick(); },1200); } } }
+function tutorialDone(){ sfx('fanfare'); for(let i=0;i<4;i++) setTimeout(()=>spawn(P.x,P.y+2,P.z,RAINBOW,60,6,6,1.5),i*200); dialog('🎉 Du bist bereit!',`<p style="text-align:center">Du kennst jetzt alles Wichtige, ${esc(uniName)}!</p><p><b>🎯 Dein großes Ziel:</b><br>• Besuche die Dörfer 🏘️ (Karte 🗺️) und hilf den Bürgermeisterinnen – jede bringt dir einen Zauber bei. Alle 6 Zauber machen dich zur Erzzauberin.<br>• Finde den Schatz 💎 in der Höhle im Schneeberg.<br>• Sammle Sterne 🌟 und schaffe die Missionen 📜 – am Ende wartet die Krone 👑.</p><p style="font-size:14px">Nachts kommen Zombies 🧟 – im Bett schlafen hält dich sicher, im Zauberkessel 🎒 braust du Schutzzauber. Und: Es gibt kein Falsch – bau, flieg und entdecke einfach!</p>`,[['Los geht\'s! 🦄',null],['Missionen ansehen 📜',showMissions]]); }
+function introStory(){ dialog('🦄 Willkommen in Sternendorf!',`<p>Lange Zeit haben die Einhörner alle Dörfer mit ihren Zaubern beschützt. Doch die Zauber sind in Vergessenheit geraten – nur die Bürgermeisterinnen kennen sie noch.</p><p>Du bist <b>${esc(uniName)}</b>, das junge Einhorn aus Sternendorf. Sternchen 🎩, die Bürgermeisterin, wartet am Brunnen auf dich.</p>`,[['Weiter ➜',()=>setTimeout(introGoal,80)]]); }
+function introGoal(){ dialog('🎯 Dein Ziel',`<p><b>1.</b> Hilf den Dörfern 🏘️ und lerne alle <b>6 Zauber</b> 🪄.<br><b>2.</b> Finde den Schatz 💎 in der Kristallhöhle im Schneeberg 🏔️.<br><b>3.</b> Sammle Sterne 🌟, erfülle Missionen 📜 – und werde zur <b>Einhorn‑Königin</b> 👑.</p><p style="font-size:14px">Unterwegs kannst du bauen 🧱, fliegen 🕊️, Hasen zähmen 🐰, Rennen fahren 🏁 und im Zauberkessel brauen 🧪.</p>`,[['Weiter ➜',()=>setTimeout(introNight,80)]]); }
+function introNight(){ dialog('🌙 Vorsicht nachts',`<p>Wenn es dunkel wird, kommen <b>Zombies</b> 🧟. Sie können dich erwischen – dann verlierst du, was du seit dem letzten Schlafen gesammelt hast.</p><p>Schutz: <b>Im Bett schlafen</b> 🛏️ (steht in jedem Haus – mitnehmen!), Zauber aus dem Kessel 🧪 und Decken als Rüstung 🧶.</p><p style="font-size:14px">Zu gruselig? Dann spiel erstmal ohne Zombies – du kannst sie im Menü jederzeit einschalten.</p>`,[['Mit Zombies spielen 🧟',()=>{ zombieMode=true; updateHearts(); save(); setTimeout(startTutorial,80); }],['Ohne Zombies spielen 🌸',()=>{ zombieMode=false; updateHearts(); save(); setTimeout(startTutorial,80); }]]); }
+function startTutorial(){ tutorial=0; tutShown=-1; tutStart.x=P.x; tutStart.z=P.z; tutStart.yaw=camYaw; save(); toast('Das Tutorial führt dich durch die ersten Schritte – oben links steht immer, was zu tun ist.',true); setTimeout(tutorialTick,1500); }
 window.addEventListener('pagehide',save); document.addEventListener('visibilitychange',()=>{ if(document.hidden) save(); });
 
 // NPC name labels
@@ -890,7 +909,7 @@ function updateLabels(){ let i=0; const W=window.innerWidth, H=window.innerHeigh
 for(let i=0;i<14;i++) butterflies.push(makeButterfly()); for(let i=0;i<7;i++) bunnies.push(makeBunny());
 function resize(){ const w=window.innerWidth,h=window.innerHeight; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); } window.addEventListener('resize',resize); resize();
 if(isPhone && !(saved&&saved.v>=5&&saved.shadows===true)) setShadows(false);
-applySky(); updateHearts(); refreshPalette();
+applySky(); updateHearts(); refreshPalette(); tutBadge();
 let last=performance.now(), timeAcc=0, compassT=0, wasInWater=false, cycleT=0, coyote=0, firstSpawnDone=false, perfAcc=0, perfN=0, perfAdj=0;
 const camTarget=new THREE.Vector3(), camPos=new THREE.Vector3();
 function loop(){ requestAnimationFrame(loop); const now=performance.now(); const rawDt=(now-last)/1000; let dt=Math.max(0,Math.min(0.05,rawDt)); last=now; timeAcc+=dt;
@@ -900,7 +919,7 @@ function loop(){ requestAnimationFrame(loop); const now=performance.now(); const
   const live=playing() && !loadingWorld;
   if(live && location.hash!=='#dev'){ perfAcc+=Math.min(0.2,rawDt); perfN++; if(perfN>=240){ const avg=perfAcc/perfN; perfAcc=0; perfN=0; if(avg>0.05 && perfAdj<2){ perfAdj++; if(shadowsOn) setShadows(false); else R=Math.max(2,R-1); save(); toast('⚡ Grafik automatisch angepasst, damit es flüssig läuft'); } } }
   // time of day
-  if(autoCycle && live){ dayTime=(dayTime+dt/DAY_LEN)%1; } applySky();
+  if(autoCycle && live){ const hold = tutorial<TUT.length && dayTime>0.66 && dayTime<0.8; if(!hold) dayTime=(dayTime+dt/DAY_LEN)%1; } applySky();
   if(shieldT>0){ shieldT-=dt; if(Math.random()<0.3) spawn(P.x+Math.sin(timeAcc*5)*0.9,P.y+0.5+Math.random()*1.5,P.z+Math.cos(timeAcc*5)*0.9,['#ff9ec4','#ffffff'],1,0.2,0.3,0.6,0); const be=document.getElementById('buff'); be.classList.remove('hidden'); be.textContent='🛡️ Schild '+Math.ceil(shieldT)+' s'; if(shieldT<=0){ be.classList.add('hidden'); toast('🛡️ Der Blütenschild ist verblasst'); } }
   // temp blocks
   for(let i=tempBlocks.length-1;i>=0;i--){ if(now>tempBlocks[i].t){ for(const [x,y,z] of tempBlocks[i].list) if(get(x,y,z)===T.REGEN){ setB(x,y,z,0); recordEdit(x,y,z,0); } tempBlocks.splice(i,1); } }
@@ -937,10 +956,10 @@ function loop(){ requestAnimationFrame(loop); const now=performance.now(); const
     camera.position.lerp(camPos,Math.min(1,dt*10)); camera.lookAt(camTarget);
     if(!isTouch&&mouseNDC&&live){ const h=raycast(mouseNDC,camDist+10); if(h){ hl.visible=true; if(removeMode) hl.position.set(h.x,h.y,h.z); else hl.position.set(h.x+h.nx,h.y+h.ny,h.z+h.nz); } else hl.visible=false; } else hl.visible=false;
     // compass + place name
-    compassT+=dt; if(compassT>0.2){ compassT=0; let best=null,bd=1e9; if(RACE.on&&RACE.rings[RACE.idx]){ const r=RACE.rings[RACE.idx]; best={x:r.x,y:r.y,z:r.z}; bd=Math.hypot(r.x-P.x,r.z-P.z); } else for(const s of activeStars){ const d=Math.hypot(s.x-P.x,s.z-P.z); if(d<bd){ bd=d; best=s; } }
-      const el=document.getElementById('compass'); if(best){ el.style.display=''; const ang=Math.atan2(best.x-P.x,best.z-P.z); const rel=ang-Math.atan2(fx,fz); document.getElementById('arrow').style.transform=`rotate(${-rel*180/Math.PI}deg)`; const dy=best.y-(P.y+1); document.getElementById('compassTxt').textContent=(RACE.on?'🏁 Ring: ':'')+`${Math.round(bd)} Blöcke${dy>4?' ⬆️ hoch oben':''}`; } else el.style.display='none';
+    compassT+=dt; if(compassT>0.2){ compassT=0; let best=null,bd=1e9; let tutT=null; if(tutorial<TUT.length && TUT[tutorial].target){ tutT=TUT[tutorial].target(); } if(tutT){ best=tutT; bd=Math.hypot(tutT.x-P.x,tutT.z-P.z); } else if(RACE.on&&RACE.rings[RACE.idx]){ const r=RACE.rings[RACE.idx]; best={x:r.x,y:r.y,z:r.z}; bd=Math.hypot(r.x-P.x,r.z-P.z); } else for(const s of activeStars){ const d=Math.hypot(s.x-P.x,s.z-P.z); if(d<bd){ bd=d; best=s; } }
+      const el=document.getElementById('compass'); if(best){ el.style.display=''; const ang=Math.atan2(best.x-P.x,best.z-P.z); const rel=ang-Math.atan2(fx,fz); document.getElementById('arrow').style.transform=`rotate(${-rel*180/Math.PI}deg)`; const dy=best.y-(P.y+1); document.getElementById('compassTxt').textContent=(tutT?'🎯 Ziel: ':(RACE.on?'🏁 Ring: ':''))+`${Math.round(bd)} Blöcke${dy>4?' ⬆️ hoch oben':''}`; } else el.style.display='none';
       const v=inVillage(P.x,P.z,0); const pe=document.getElementById('place'); const near = v?`· 🏘️ ${v.name}`:(Math.hypot(P.x-CASTLE.x,P.z-CASTLE.z)<14?'· 🏰 Schloss':(Math.hypot(P.x-MOUNT.x,P.z-MOUNT.z)<16?'· 🏔️ Schneeberg':'')); pe.textContent=near;
-      activateVillages(); if(tutorial<TUT.length&&live) tutorialTick(); if(Math.random()<0.1) saveSoon(); }
+      activateVillages(); if(tutorial<TUT.length&&live&&stats.introSeen) tutorialTick(); if(Math.random()<0.1) saveSoon(); }
     updateNpcs(dt,timeAcc); updateLabels(); updateAnimals(dt,timeAcc); updateZombies(dt,timeAcc); updateRace(dt,timeAcc); if(chest.visible){ chest.userData.gem.rotation.y=timeAcc*2; chest.userData.gem.position.y=0.6+Math.sin(timeAcc*3)*0.08; }
   }
   updateStars(timeAcc); updateParts(dt); updateWeather(dt,timeAcc); updateLamps(dt);
