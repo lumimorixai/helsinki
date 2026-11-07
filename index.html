@@ -160,7 +160,7 @@
   <div class="card">
     <button class="xbtn hidden" id="startX" title="Schließen">✕</button>
     <h1>Einhorn-Blockwelt</h1>
-    <div style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 7.2</div>
+    <div style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 7.3</div>
     <p>Eine riesige Zauberwelt voller Dörfer, Ponys, Sterne und Geheimnisse. Lerne Zaubersprüche, baue, flieg – und finde den Schatz! 🌟</p>
     <input id="nameIn" maxlength="16" placeholder="Wie heißt dein Einhorn?" value="" autocomplete="off">
     <div class="lbl">Fellfarbe</div><div class="swatches" id="swatches"></div>
@@ -352,14 +352,14 @@ function inVillage(x,z,m){ for(const v of villagesNear(x,z,m||0)) if(Math.hypot(
 const skey=(x,y,z)=>((x+4096)*8192+(z+4096))*64+y; // numeric key, no bit ops
 const sunkey=k=>{ const y=k%64; const r=(k-y)/64; const z=r%8192-4096; const x=(r-(r%8192))/8192-4096; return {x,y,z}; };
 function treeAt(x,z){ if(x*x+z*z<120) return null; const h=height(x,z); if(h<=SEA+1) return null; if(inVillage(x,z,4)) return null; const b=biomeAt(x,z); const r=hash(x+500,z+500);
-  const p = b==='zuckerwald'?0.07 : b==='wiese'?0.022 : b==='kristall'?0.035 : b==='blumenwiese'?0.012 : 0.02;
+  const p = b==='zuckerwald'?0.07 : b==='wiese'?0.03 : b==='kristall'?0.035 : b==='blumenwiese'?0.016 : 0.02;
   if(r>p) return null; const k=hash(x+9,z+9), k2=hash(x*3+1,z*5+2);
   let kind='oak', leaf=T.LAUB, trunkT=T.HOLZ;
   if(b==='schnee'){ kind='fir'; leaf=T.NADEL; }
   else if(b==='zuckerwald'){ kind='round'; leaf=k>0.35?T.WATTE:T.LILA; }
-  else if(b==='kristall'){ kind= k>0.5?'round':'oak'; leaf=k>0.3?T.LILA:T.LAUB; }
+  else if(b==='kristall'){ kind= k>0.5?'round':'oak'; leaf=k>0.6?T.LILA:(k>0.3?T.WATTE:T.LAUB); }
   else if(b==='blumenwiese'){ kind= k>0.5?'oak':'round'; leaf=k>0.4?T.BLUETE:T.LAUB; }
-  else { if(k<0.5){ kind='oak'; leaf=T.LAUB; } else if(k<0.75){ kind='birch'; leaf=T.LAUB; trunkT=T.BIRKE; } else if(k<0.9){ kind='fir'; leaf=T.NADEL; } else { kind='round'; leaf=T.WATTE; } }
+  else { if(k<0.38){ kind='oak'; leaf=T.LAUB; } else if(k<0.52){ kind='birch'; leaf=T.LAUB; trunkT=T.BIRKE; } else if(k<0.62){ kind='fir'; leaf=T.NADEL; } else if(k<0.9){ kind='round'; leaf=T.WATTE; } else { kind='round'; leaf=T.LILA; } }
   const trunk = kind==='fir' ? 5+Math.floor(k2*4) : kind==='birch' ? 5+Math.floor(k2*3) : 3+Math.floor(k2*3);
   return {x,z,h,leaf,trunkT,kind,trunk,seed:x*131+z*7}; }
 function treeBlocks(tr,out){ const {x,z,h,leaf,kind,trunk}=tr; const trunkT=tr.trunkT||T.HOLZ; const rnd=(i)=>hash(tr.seed+i*17,tr.seed*3+i);
@@ -394,7 +394,7 @@ function villageBlocks(v){ if(vblocks.has(v.id)) return vblocks.get(v.id); const
     put(hs.x+(w2-1),H+1,hs.z+(d2-1),T.BETT); put(hs.x-(w2-1),H+1,hs.z+(d2-1),T.TISCH); put(hs.x-(w2-1),H+1,hs.z+(d2-2),T.STUHL); if(hi%2===0) put(hs.x-(w2-1),H+1,hs.z-(d2-1),T.TRUHE);
     // gable roof along x
     const roofAxisX = hs.w>=hs.d; const span = roofAxisX ? d2 : w2;
-    for(let lvl=0;lvl<=span+1;lvl++){ const y=H+wallH+1+lvl; for(let dx=-w2-1;dx<=w2+1;dx++) for(let dz=-d2-1;dz<=d2+1;dz++){ const across = roofAxisX? Math.abs(dz) : Math.abs(dx); const along = roofAxisX? Math.abs(dx) : Math.abs(dz); const alongMax = roofAxisX? w2+1 : d2+1; if(along>alongMax) continue; const target=span+1-lvl; if(across===target) put(hs.x+dx,y,hs.z+dz,T.DACH); else if(across<target && lvl>0 && along===alongMax) put(hs.x+dx,y,hs.z+dz,T.BRETT); } }
+    for(let lvl=0;lvl<=span+1;lvl++){ const y=H+wallH+1+lvl; for(let dx=-w2-1;dx<=w2+1;dx++) for(let dz=-d2-1;dz<=d2+1;dz++){ const across = roofAxisX? Math.abs(dz) : Math.abs(dx); const along = roofAxisX? Math.abs(dx) : Math.abs(dz); const alongMax = roofAxisX? w2+1 : d2+1; if(along>alongMax) continue; const target=span+1-lvl; if(across===target || (lvl===0 && across===span)) put(hs.x+dx,y,hs.z+dz,T.DACH); else if(across<target && lvl>0 && along===alongMax) put(hs.x+dx,y,hs.z+dz,T.BRETT); } }
     // path to well
     let px=hs.x, pz=hs.z; const steps=Math.max(Math.abs(v.cx-px),Math.abs(v.cz-pz)); for(let i=1;i<=steps;i++){ const x=Math.round(hs.x+(v.cx-hs.x)*i/steps), z=Math.round(hs.z+(v.cz-hs.z)*i/steps); if(Math.abs(x-hs.x)<=w2&&Math.abs(z-hs.z)<=d2) continue; if(Math.hypot(x-v.cx,z-v.cz)<=3.2) continue; put(x,H,z,T.PFLASTER); put(x,H+1,z,T.AIR); }
     // flower box
@@ -434,6 +434,7 @@ function ensureTerrain(cx,cz){ let c=getChunk(cx,cz); if(!c) c=newChunk(cx,cz); 
     if(h>SEA+1 && h<=SEA+26 && !inVillage(x,z,2)){ const r=hash(x*3+1,z*7+2); const fl = b==='blumenwiese'?0.22 : b==='wiese'?0.07 : b==='zuckerwald'?0.05 : b==='kristall'?0.06 : 0.01;
       if(r<fl) d[base+h+1]=T.BLUME; else if(r<fl+(b==='schnee'?0.02:0.12)) d[base+h+1]=T.TUFT; else if(b==='zuckerwald'&&r<fl+0.16) d[base+h+1]=T.PILZ; }
     if(b==='schnee'&&h>SEA+8&&hash(x+77,z+99)<0.012) d[base+h]=T.GOLD;
+    if(h>SEA+1&&h<=SEA+26&&(b==='wiese'||b==='blumenwiese'||b==='zuckerwald')&&hash(x*5+3,z*3+11)<0.006&&!inVillage(x,z,3)){ d[base+h+1]=T.WATTE; if(hash(x,z+5)>0.5) d[base+h+2]=T.WATTE; }
     // clouds
     const n=noise(x/14+200,z/9+300)*0.7+noise(x/5+400,z/5+100)*0.3; if(n>0.655){ const th=(n-0.655)*16; const top=44+Math.min(3,Math.floor(th)); const bot=44-(th>1.2?1:0)-(th>2.6?1:0); for(let y=bot;y<=top;y++){ const edge=(y===top&&th%1<0.35)||(y===bot&&bot<44&&hash(x+y,z)>0.6); if(!edge) d[base+y]=T.WOLKE; } }
   }
@@ -720,13 +721,13 @@ let curBlock=T.REGEN, removeMode=false, curStamp=null; const undoStack=[]; const
 function applyChanges(list){ const rec=[]; for(const [x,y,z,t] of list){ const prev=get(x,y,z); if(prev===t) continue; rec.push([x,y,z,prev]); setB(x,y,z,t); recordEdit(x,y,z,t); } if(rec.length){ undoStack.push(rec); if(undoStack.length>40) undoStack.shift(); } return rec.length; }
 function undo(){ const rec=undoStack.pop(); if(!rec){ toast('Nichts zum Rückgängigmachen'); return; } for(const [x,y,z,prev] of rec){ setB(x,y,z,prev); recordEdit(x,y,z,prev); } saveSoon(); sfx('remove'); toast('↩️ Rückgängig'); }
 const STAMPS={
-  haus:{e:'🏠',n:'Häuschen',f:()=>{ const L=[]; for(let x=-2;x<=2;x++) for(let z=-2;z<=2;z++){ const wall=Math.abs(x)===2||Math.abs(z)===2; const corner=Math.abs(x)===2&&Math.abs(z)===2; L.push([x,-1,z,T.BRETT]); for(let y=0;y<3;y++){ if(wall && !(x===0&&z===2&&y<2)){ let t=corner?T.HOLZ:T.BRETT; if(y===1&&!corner&&(x===0||z===0)) t=T.GLAS; L.push([x,y,z,t]); } } } for(let l=0;l<=3;l++) for(let x=-3;x<=3;x++) for(let z=-3;z<=3;z++){ if(Math.abs(z)===3-l) L.push([x,3+l,z,T.DACH]); else if(Math.abs(z)<3-l&&l>0&&Math.abs(x)===3) L.push([x,3+l,z,T.BRETT]); } L.push([0,2,0,T.LAMPE]); return L; }},
+  haus:{e:'🏠',n:'Häuschen',f:()=>{ const L=[]; for(let x=-2;x<=2;x++) for(let z=-2;z<=2;z++){ const wall=Math.abs(x)===2||Math.abs(z)===2; const corner=Math.abs(x)===2&&Math.abs(z)===2; L.push([x,-1,z,T.BRETT]); for(let y=0;y<3;y++){ if(wall && !(x===0&&z===2&&y<2)){ let t=corner?T.HOLZ:T.BRETT; if(y===1&&!corner&&(x===0||z===0)) t=T.GLAS; L.push([x,y,z,t]); } } } for(let l=0;l<=3;l++) for(let x=-3;x<=3;x++) for(let z=-3;z<=3;z++){ if(Math.abs(z)===3-l||(l===0&&Math.abs(z)===2)) L.push([x,3+l,z,T.DACH]); else if(Math.abs(z)<3-l&&l>0&&Math.abs(x)===3) L.push([x,3+l,z,T.BRETT]); } L.push([0,2,0,T.LAMPE]); return L; }},
   regen:{e:'🌈',n:'Regenbogen',f:()=>{ const L=[]; for(const r of [5,4]) for(let a=0;a<=Math.PI;a+=0.03){ L.push([Math.round(r*Math.cos(a)),Math.round(r*Math.sin(a)),0,T.REGEN]); } return L; }},
   baum:{e:'🌳',n:'Zuckerbaum',f:()=>{ const L=[]; for(let y=0;y<3;y++) L.push([0,y,0,T.HOLZ]); for(let dx=-2;dx<=2;dx++) for(let dy=-1;dy<=2;dy++) for(let dz=-2;dz<=2;dz++) if(dx*dx+dy*dy*1.4+dz*dz<=4.6) L.push([dx,3+dy,dz,T.WATTE]); return L; }},
   herz:{e:'💖',n:'Herz',f:()=>{ const L=[]; const pat=['.XX.XX.','XXXXXXX','XXXXXXX','.XXXXX.','..XXX..','...X...']; pat.forEach((row,i)=>{ const y=pat.length-1-i; [...row].forEach((c,j)=>{ if(c==='X') L.push([j-3,y,0,T.HERZ]); }); }); return L; }},
   turm:{e:'🏰',n:'Turm',f:()=>{ const L=[]; for(let y=0;y<7;y++) for(let x=-1;x<=1;x++) for(let z=-1;z<=1;z++){ if(x===0&&z===0) continue; if(y<2&&x===0&&z===1) continue; L.push([x,y,z,y===6?T.GOLD:T.KRISTALL]); } L.push([0,1,0,T.LAMPE]); for(let x=-1;x<=1;x++) for(let z=-1;z<=1;z++) L.push([x,6,z,T.GOLD]); L.push([0,7,0,T.REGEN]); return L; }},
   teich:{e:'🏞️',n:'Teich',f:()=>{ const L=[]; for(let x=-2;x<=2;x++) for(let z=-2;z<=2;z++){ if(x*x+z*z>5) continue; L.push([x,-1,z,T.WASSER]); L.push([x,-2,z,T.SAND]); } for(const [x,z] of [[3,0],[-3,0],[0,3],[0,-3],[2,2],[-2,-2],[2,-2],[-2,2]]) L.push([x,0,z,T.BLUME]); return L; }},
-  heim:{e:'🏡',n:'Gemütliches Haus',f:()=>{ const L=[]; for(let x=-3;x<=3;x++) for(let z=-3;z<=3;z++){ const wall=Math.abs(x)===3||Math.abs(z)===3; const corner=Math.abs(x)===3&&Math.abs(z)===3; L.push([x,-1,z,T.BRETT]); for(let y=0;y<3;y++){ if(wall && !(x===0&&z===3&&y<2)){ let t=corner?T.HOLZ:T.BRETT; if(y===1&&!corner&&(x===0||z===0)) t=T.GLAS; L.push([x,y,z,t]); } } } L.push([0,0,3,T.TUER]); for(let l=0;l<=4;l++) for(let x=-4;x<=4;x++) for(let z=-4;z<=4;z++){ if(Math.abs(z)===4-l) L.push([x,3+l,z,T.DACH]); else if(Math.abs(z)<4-l&&l>0&&Math.abs(x)===4) L.push([x,3+l,z,T.BRETT]); } L.push([0,2,0,T.LAMPE]); L.push([2,0,-2,T.BETT]); L.push([-2,0,-2,T.TISCH]); L.push([-2,0,-1,T.STUHL]); L.push([2,0,1,T.TRUHE]); L.push([-2,0,2,T.TOPF]); for(let x=-5;x<=5;x++){ L.push([x,0,5,T.ZAUN]); L.push([x,0,-5,T.ZAUN]); } for(let z=-4;z<=4;z++){ if(z!==0||true){ L.push([5,0,z,T.ZAUN]); L.push([-5,0,z,T.ZAUN]); } } L.push([0,0,5,T.AIR]); L.push([1,0,4,T.BLUME]); L.push([-1,0,4,T.BLUME]); return L; }},
+  heim:{e:'🏡',n:'Gemütliches Haus',f:()=>{ const L=[]; for(let x=-3;x<=3;x++) for(let z=-3;z<=3;z++){ const wall=Math.abs(x)===3||Math.abs(z)===3; const corner=Math.abs(x)===3&&Math.abs(z)===3; L.push([x,-1,z,T.BRETT]); for(let y=0;y<3;y++){ if(wall && !(x===0&&z===3&&y<2)){ let t=corner?T.HOLZ:T.BRETT; if(y===1&&!corner&&(x===0||z===0)) t=T.GLAS; L.push([x,y,z,t]); } } } L.push([0,0,3,T.TUER]); for(let l=0;l<=4;l++) for(let x=-4;x<=4;x++) for(let z=-4;z<=4;z++){ if(Math.abs(z)===4-l||(l===0&&Math.abs(z)===3)) L.push([x,3+l,z,T.DACH]); else if(Math.abs(z)<4-l&&l>0&&Math.abs(x)===4) L.push([x,3+l,z,T.BRETT]); } L.push([0,2,0,T.LAMPE]); L.push([2,0,-2,T.BETT]); L.push([-2,0,-2,T.TISCH]); L.push([-2,0,-1,T.STUHL]); L.push([2,0,1,T.TRUHE]); L.push([-2,0,2,T.TOPF]); for(let x=-5;x<=5;x++){ L.push([x,0,5,T.ZAUN]); L.push([x,0,-5,T.ZAUN]); } for(let z=-4;z<=4;z++){ if(z!==0||true){ L.push([5,0,z,T.ZAUN]); L.push([-5,0,z,T.ZAUN]); } } L.push([0,0,5,T.AIR]); L.push([1,0,4,T.BLUME]); L.push([-1,0,4,T.BLUME]); return L; }},
   bruecke:{e:'🌉',n:'Brücke',f:()=>{ const L=[]; for(let z=0;z<12;z++) for(let x=-1;x<=1;x++){ L.push([x,-1,z,T.BRETT]); if(Math.abs(x)===1&&z%3===0) L.push([x,0,z,T.HOLZ]); } return L; }},
   garten:{e:'🌷',n:'Blumengarten',f:()=>{ const L=[]; for(let x=-3;x<=3;x++) for(let z=-3;z<=3;z++){ const edge=Math.abs(x)===3||Math.abs(z)===3; if(edge){ if((x+z)%2===0) L.push([x,0,z,T.HOLZ]); } else if((x+z)%2===0) L.push([x,0,z,T.BLUME]); else if(Math.random()<0.5) L.push([x,0,z,T.TUFT]); } L.push([0,0,0,T.LAMPE]); return L; }}
 };
@@ -810,7 +811,7 @@ function openSpells(){ const pot=['schild','schlaf','blitz','apfel'].filter(id=>
 // ================= Quests =================
 const QUESTS=[ // index by village.questIdx
   {item:'blume',n:5,reward:'bluehen',ask:'Unsere Dorfwiese soll noch bunter werden! Bringst du mir 5 Blumen? Du findest sie überall auf den Wiesen – einfach abbauen (lange drücken).'},
-  {item:'watte',n:8,reward:'bruecke',ask:'Ich backe eine Zuckerwatte-Torte! Bringst du mir 8 Zuckerwatte? Die rosa Baumkronen sind daraus.'},
+  {item:'watte',n:8,reward:'bruecke',ask:'Ich backe eine Zuckerwatte-Torte! Bringst du mir 8 Zuckerwatte? Die rosa, flauschigen Baumkronen und die rosa Büsche auf den Wiesen sind daraus – einfach abbauen.'},
   {item:'kristall',n:6,reward:'frost',ask:'Meine Laterne braucht Kristalle. Bringst du mir 6 Kristalle? Die lila Kristallbäume und die Höhle haben welche.'},
   {item:'holz',n:10,reward:'wachsen',ask:'Wir bauen einen neuen Zaun. Bringst du mir 10 Holz? Baumstämme abbauen!'},
   {item:'gold',n:3,reward:'teleport',ask:'Für den Brunnen brauche ich 3 Gold. Goldnuggets glitzern oben auf den Schneebergen – oder auf den Türmen des Schlosses.'},
