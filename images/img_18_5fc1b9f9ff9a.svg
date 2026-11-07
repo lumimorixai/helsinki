@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
-    <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#b9deee"/><stop offset="1" stop-color="#fff1d7"/></linearGradient></defs><rect width="1200" height="800" fill="url(#sky)"/>
-    <g><rect x="50" y="250" width="250" height="420" fill="#e5b46e"/><rect x="300" y="180" width="290" height="490" fill="#d98d7b"/><rect x="590" y="245" width="255" height="425" fill="#f1e1bc"/><rect x="845" y="155" width="305" height="515" fill="#9ebec0"/></g>
-    <g fill="#31515a"><path d="M50 250l125-95 125 95M300 180l145-105 145 105M590 245l128-92 127 92M845 155l152-105 153 105"/></g>
-    <g fill="#f7f3e9"><g transform="translate(85 310)"><rect width="55" height="75"/><rect x="90" width="55" height="75"/><rect x="90" y="125" width="55" height="75"/><rect y="125" width="55" height="75"/></g><g transform="translate(345 250)"><rect width="60" height="85"/><rect x="100" width="60" height="85"/><rect x="100" y="135" width="60" height="85"/><rect y="135" width="60" height="85"/></g><g transform="translate(630 310)"><rect width="55" height="75"/><rect x="95" width="55" height="75"/><rect x="95" y="125" width="55" height="75"/><rect y="125" width="55" height="75"/></g></g>
-    <path d="M0 670h1200v130H0z" fill="#5d6965"/><path d="M0 715h1200" stroke="#fff" stroke-width="9" stroke-dasharray="45 30"/>
-    </svg>
