@@ -160,7 +160,7 @@
   <div class="card">
     <button class="xbtn hidden" id="startX" title="Schließen">✕</button>
     <h1>Einhorn-Blockwelt</h1>
-    <div style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 7.5</div>
+    <div style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 7.6</div>
     <p>Eine riesige Zauberwelt voller Dörfer, Ponys, Sterne und Geheimnisse. Lerne Zaubersprüche, baue, flieg – und finde den Schatz! 🌟</p>
     <input id="nameIn" maxlength="16" placeholder="Wie heißt dein Einhorn?" value="" autocomplete="off">
     <div class="lbl">Fellfarbe</div><div class="swatches" id="swatches"></div>
@@ -425,7 +425,7 @@ const editsByChunk=new Map(); // ckey -> Map(skey->type)
 function recordEdit(x,y,z,t){ const k=skey(x,y,z); edits.set(k,t); const ck=ckey(Math.floor(x/CH),Math.floor(z/CH)); let m=editsByChunk.get(ck); if(!m){ m=new Map(); editsByChunk.set(ck,m);} m.set(k,t); }
 function rebuildEditIndex(){ editsByChunk.clear(); for(const [k,t] of edits){ const p=sunkey(k); const ck=ckey(Math.floor(p.x/CH),Math.floor(p.z/CH)); let m=editsByChunk.get(ck); if(!m){ m=new Map(); editsByChunk.set(ck,m);} m.set(k,t); } }
 const lidx=(lx,y,lz)=>(lx*CH+lz)*CHY+y;
-function newChunk(cx,cz){ const c={cx,cz,data:new Uint8Array(CH*CH*CHY),gen:false,deco:false,dirty:true,meshes:[],stars:[],dist:0}; chunks.set(ckey(cx,cz),c); return c; }
+function newChunk(cx,cz){ const c={cx,cz,data:new Uint8Array(CH*CH*CHY),gen:false,deco:false,dirty:true,meshes:[],stars:[],candy:[],dist:0}; chunks.set(ckey(cx,cz),c); return c; }
 function getChunk(cx,cz){ return chunks.get(ckey(cx,cz)); }
 function ensureTerrain(cx,cz){ let c=getChunk(cx,cz); if(!c) c=newChunk(cx,cz); if(c.gen) return c; const d=c.data; const x0=cx*CH, z0=cz*CH;
   for(let lx=0;lx<CH;lx++) for(let lz=0;lz<CH;lz++){ const x=x0+lx, z=z0+lz; const h=height(x,z); const b=biomeAt(x,z); const base=lidx(lx,0,lz);
@@ -441,7 +441,7 @@ function ensureTerrain(cx,cz){ let c=getChunk(cx,cz); if(!c) c=newChunk(cx,cz); 
   c.gen=true; return c; }
 function setLocal(c,x,y,z,t){ const lx=x-c.cx*CH, lz=z-c.cz*CH; if(lx<0||lx>=CH||lz<0||lz>=CH||y<0||y>=CHY) return false; c.data[lidx(lx,y,lz)]=t; return true; }
 function decorate(c){ if(c.deco) return; const x0=c.cx*CH, z0=c.cz*CH; const list=[];
-  for(let x=x0-4;x<x0+CH+4;x++) for(let z=z0-4;z<z0+CH+4;z++){ const tr=treeAt(x,z); if(tr) treeBlocks(tr,list); }
+  for(let x=x0-4;x<x0+CH+4;x++) for(let z=z0-4;z<z0+CH+4;z++){ const tr=treeAt(x,z); if(tr){ treeBlocks(tr,list); if(tr.leaf===T.WATTE && x>=x0&&x<x0+CH&&z>=z0&&z<z0+CH){ const n=1+Math.floor(hash(x+3,z+7)*2); for(let i=0;i<n;i++){ const a=hash(x+i,z-i)*Math.PI*2; const cx2=x+Math.round(Math.cos(a)*2.5), cz2=z+Math.round(Math.sin(a)*2.5); const k=skey(cx2,0,cz2)+i; c.candy.push({x:cx2+0.5-hash(i,x)*1,z:cz2+0.5-hash(z,i)*1,yOff:1.0+hash(i,z)*0.8,k:'c'+k}); } } } }
   for(const [x,y,z,t] of list){ const lx=x-x0, lz=z-z0; if(lx<0||lx>=CH||lz<0||lz>=CH||y<0||y>=CHY) continue; const i=lidx(lx,y,lz); if(t===T.HOLZ||!c.data[i]||B[c.data[i]].cross) c.data[i]=t; }
   for(const v of villagesNear(x0+8,z0+8,14)){ const m=villageBlocks(v); for(const [k,t] of m){ const p=sunkey(k); setLocal(c,p.x,p.y,p.z,t); } }
   if(Math.abs(x0-20)<120 && Math.abs(z0)<120){ const m=fixedStructures(); for(const [k,t] of m){ const p=sunkey(k); setLocal(c,p.x,p.y,p.z,t); } }
@@ -501,7 +501,7 @@ function updateChunks(px,pz,budgetMs){ const t0=performance.now(); const pcx=Mat
   const want=[]; for(let dx=-R-1;dx<=R+1;dx++) for(let dz=-R-1;dz<=R+1;dz++) want.push([pcx+dx,pcz+dz,dx*dx+dz*dz]); want.sort((a,b)=>a[2]-b[2]);
   let did=0;
   for(const [cx,cz,dd] of want){ if(performance.now()-t0>budgetMs) break; let c=getChunk(cx,cz); if(!c||!c.gen){ ensureTerrain(cx,cz); did++; } }
-  for(const [cx,cz,dd] of want){ if(dd>(R)*(R)+1) continue; if(performance.now()-t0>budgetMs) break; const c=getChunk(cx,cz); if(!c||!c.gen||c.deco) continue; let ok=true; for(let dx=-1;dx<=1&&ok;dx++) for(let dz=-1;dz<=1;dz++){ const n=getChunk(cx+dx,cz+dz); if(!n||!n.gen){ ok=false; break; } } if(ok){ decorate(c); starsDirty=true; for(let dx=-1;dx<=1;dx++) for(let dz=-1;dz<=1;dz++){ const n=getChunk(cx+dx,cz+dz); if(n) n.dirty=true; } } }
+  for(const [cx,cz,dd] of want){ if(dd>(R)*(R)+1) continue; if(performance.now()-t0>budgetMs) break; const c=getChunk(cx,cz); if(!c||!c.gen||c.deco) continue; let ok=true; for(let dx=-1;dx<=1&&ok;dx++) for(let dz=-1;dz<=1;dz++){ const n=getChunk(cx+dx,cz+dz); if(!n||!n.gen){ ok=false; break; } } if(ok){ decorate(c); starsDirty=true; candyDirty=true; for(let dx=-1;dx<=1;dx++) for(let dz=-1;dz<=1;dz++){ const n=getChunk(cx+dx,cz+dz); if(n) n.dirty=true; } } }
   for(const [cx,cz,dd] of want){ if(dd>R*R+1) continue; if(performance.now()-t0>budgetMs) break; const c=getChunk(cx,cz); if(c&&c.deco&&c.dirty) meshChunk(c); }
   // unload far meshes
   for(const c of chunks.values()){ const dx=c.cx-pcx, dz=c.cz-pcz; if(dx*dx+dz*dz>(R+3)*(R+3) && c.meshes.length){ for(const m of c.meshes){ scene.remove(m); m.geometry.dispose(); } c.meshes=[]; c.dirty=true; } }
@@ -735,7 +735,7 @@ function placeStamp(hit){ const def=STAMPS[curStamp]; if(!def) return; let bx=hi
   const q=((Math.round(camYaw/(Math.PI/2))%4)+4)%4; const rot=(x,z)=>{ for(let i=0;i<q;i++){ const t=x; x=-z; z=t; } return [x,z]; };
   const list=[]; for(const [dx,dy,dz,t] of def.f()){ const [rx,rz]=rot(dx,dz); const x=bx+rx,y=by+dy,z=bz+rz; if(y<1||y>=CHY-1) continue; const ex=get(x,y,z); if(curStamp!=='teich'&&curStamp!=='bruecke'&&dy>=0 && ex && !B[ex].cross) continue; if(isSolid(t)&&playerIntersects(x,y,z)) continue; list.push([x,y,z,t]); }
   const n=applyChanges(list); if(!n){ toast('Hier ist kein Platz 🙈'); return; } stats.placed+=n; mission('first'); if(stats.placed>=100) mission('builder'); spawn(bx,by+1.5,bz,RAINBOW,60,4,4,1.2); sfx('magic'); saveSoon(); toast(def.e+' '+def.n+' gebaut!'); }
-function doAction(nd,forceRemove){ if(!playing()) return; if(!forceRemove && (tapStar(nd)||tapZombie(nd)||tapPet(nd)||tapWild(nd)||tapNpc(nd)||tapBunny(nd))) return; const rem=forceRemove||removeMode;
+function doAction(nd,forceRemove){ if(!playing()) return; if(!forceRemove && (tapStar(nd)||tapCandy(nd)||tapZombie(nd)||tapPet(nd)||tapWild(nd)||tapNpc(nd)||tapBunny(nd))) return; const rem=forceRemove||removeMode;
   const hit=raycast(nd,camDist+10,!rem&&!curStamp); if(!hit) return;
   if(!rem && !curStamp && hit.type===T.BETT){ sleepInBed(hit.x,hit.y,hit.z); return; }
   if(!rem && !curStamp && (hit.type===T.TUER||hit.type===T.TUER_OFFEN)){ toggleDoor(hit.x,hit.y,hit.z); return; }
@@ -811,7 +811,7 @@ function openSpells(){ const pot=['schild','schlaf','blitz','apfel'].filter(id=>
 // ================= Quests =================
 const QUESTS=[ // index by village.questIdx
   {item:'blume',n:5,reward:'bluehen',ask:'Unsere Dorfwiese soll noch bunter werden! Bringst du mir 5 Blumen? Du findest sie überall auf den Wiesen – einfach abbauen (lange drücken).'},
-  {item:'watte',n:8,reward:'bruecke',ask:'Ich backe eine Zuckerwatte-Torte! Bringst du mir 8 Zuckerwatte? Die rosa, flauschigen Baumkronen und die rosa Büsche auf den Wiesen sind daraus – einfach abbauen.'},
+  {item:'watte',n:8,reward:'bruecke',ask:'Ich backe eine Zuckerwatte-Torte! Bringst du mir 8 Zuckerwatte? Rosa Zuckerwatte-Wölkchen 🍬 schweben bei den rosa Bäumen – einfach hindurchlaufen oder antippen.'},
   {item:'kristall',n:6,reward:'frost',ask:'Meine Laterne braucht Kristalle. Bringst du mir 6 Kristalle? Die lila Kristallbäume und die Höhle haben welche.'},
   {item:'holz',n:10,reward:'wachsen',ask:'Wir bauen einen neuen Zaun. Bringst du mir 10 Holz? Baumstämme abbauen!'},
   {item:'gold',n:3,reward:'teleport',ask:'Für den Brunnen brauche ich 3 Gold. Goldnuggets glitzern oben auf den Schneebergen – oder auf den Türmen des Schlosses.'},
@@ -964,6 +964,17 @@ function setHomeVillage(v){ homeVillage={id:v.id,name:v.name,x:v.cx,z:v.cz}; spa
 function homeDialog(){ const v=inVillage(P.x,P.z,0); const cur=homeVillage?`<p style="text-align:center">Dein Heimatdorf: <b>🏡 ${esc(homeVillage.name)}</b><br><small>Dort wachst du auf, wenn dich nachts etwas erwischt, und „Nach Hause“ bringt dich dorthin.</small></p>`:'<p style="text-align:center">Du hast noch kein Heimatdorf. Stell dich in ein Dorf und tipp hier auf „Hier wohne ich“.</p>';
   const btns=[]; if(v && (!homeVillage||homeVillage.id!==v.id)) btns.push([`🏡 Hier wohne ich: ${v.name}`,()=>setHomeVillage(v)]); if(homeVillage) btns.push(['🏠 Nach Hause',()=>teleportTo(homeVillage.x,homeVillage.z+4)]); btns.push(['Schließen',null]);
   dialog('🏡 Heimatdorf',cur+(v&&(!homeVillage||homeVillage.id!==v.id)?`<p style="text-align:center;font-size:14px">Du bist gerade in <b>${esc(v.name)}</b>.</p>`:''),btns); }
+
+// ---- Zuckerwatte-Wölkchen (einsammeln wie Sterne) ----
+let candyTaken={}; // key -> time taken
+const candyMesh=new THREE.InstancedMesh(new THREE.SphereGeometry(0.34,8,7),new THREE.MeshLambertMaterial({color:0xffb6dc,emissive:0xff8fc8,emissiveIntensity:0.25}),400); candyMesh.frustumCulled=false; scene.add(candyMesh);
+let activeCandy=[]; let candyDirty=true;
+function refreshCandy(){ activeCandy=[]; const pcx=Math.floor(P.x/CH), pcz=Math.floor(P.z/CH); for(const c of chunks.values()){ if(Math.abs(c.cx-pcx)>R+1||Math.abs(c.cz-pcz)>R+1||!c.deco) continue; for(const s of c.candy){ const t=candyTaken[s.k]; if(t!=null && timeAcc-t<480) continue; activeCandy.push(s); } } candyDirty=false; }
+const _cq=new THREE.Quaternion(), _ce=new THREE.Euler(), _cs=new THREE.Vector3(), _cp=new THREE.Vector3(), _cm=new THREE.Matrix4();
+function updateCandy(time){ if(candyDirty) refreshCandy(); let n=0; for(const s of activeCandy){ if(n>=400) break; if(s.gy==null) s.gy=height(Math.round(s.x),Math.round(s.z)); const y=s.gy+s.yOff+Math.sin(time*2+s.x)*0.12; _ce.set(0,time+s.z,0); _cq.setFromEuler(_ce); const sc=1+Math.sin(time*3+s.x*2)*0.08; _cs.set(sc*1.1,sc*0.9,sc); _cp.set(s.x,y,s.z); _cm.compose(_cp,_cq,_cs); candyMesh.setMatrixAt(n++,_cm);
+    if(Math.abs(s.x-P.x)<1.0&&Math.abs(s.z-P.z)<1.0&&y>P.y-0.6&&y<P.y+P.h+0.8) collectCandy(s); } candyMesh.count=n; candyMesh.instanceMatrix.needsUpdate=true; }
+function collectCandy(s){ candyTaken[s.k]=timeAcc; candyDirty=true; addItem('watte',1); spawn(s.x,s.gy+s.yOff,s.z,['#ffb6dc','#ffffff','#ff8fc8'],25,2,3,0.9); sfx('star'); toast('🍬 Zuckerwatte: '+inv.watte); }
+function tapCandy(nd){ const s=pickNear(nd,activeCandy,s=>({x:s.x,y:(s.gy||height(Math.round(s.x),Math.round(s.z)))+s.yOff,z:s.z}),0.7,14); if(!s) return false; collectCandy(s); return true; }
 // ================= Audio =================
 let actx=null, musicTimer=null, masterGain=null, musicOn=true;
 function audio(){ if(!actx){ actx=new (window.AudioContext||window.webkitAudioContext)(); masterGain=actx.createGain(); masterGain.gain.value=0.9; masterGain.connect(actx.destination); } if(actx.state==='suspended') actx.resume(); return actx; }
@@ -1018,12 +1029,12 @@ function openBag(){ const keys=Object.keys(inv).filter(k=>inv[k]>0 && !RECIPES.s
   dialog('🎒 Rucksack',html+armorTxt+tiere+inventar+kessel+(q.length?'<p style="margin-top:14px;font-weight:800">Offene Aufgaben</p><div class="missions">'+q.join('')+'</div>':''),[['Schließen',null]]);
   document.querySelectorAll('[data-craft]').forEach(b=>b.onclick=()=>{ document.getElementById('dlg').classList.add('hidden'); craft(b.dataset.craft); });
   document.querySelectorAll('[data-use]').forEach(b=>b.onclick=()=>{ document.getElementById('dlg').classList.add('hidden'); const id=b.dataset.use; const r=RECIPES.find(x=>x.id===id); if(r.armor) equipArmor(id); else setTimeout(()=>usePotion(id),60); }); }
-function openMap(){ const S=200, scale=1.4; const html=`<canvas id="mapc" width="${S}" height="${S}"></canvas><p style="font-size:13px;text-align:center;margin:6px 0 0">🏘️ Dorf · 🏰 Schloss · 🏔️ Schneeberg · 🦄 du · ⭐ Sterne in der Nähe</p>`; dialog('🗺️ Karte',html,[['Schließen',null]]);
+function openMap(){ const S=200, scale=1.4; const html=`<canvas id="mapc" width="${S}" height="${S}"></canvas><p style="font-size:13px;text-align:center;margin:6px 0 0">🏘️ Dorf · 🏰 Schloss · 🏔️ Schneeberg · 🦄 du · ⭐ Sterne · 🍬 Zuckerwatte</p>`; dialog('🗺️ Karte',html,[['Schließen',null]]);
   const c=document.getElementById('mapc'); const g=c.getContext('2d'); const img=g.createImageData(S,S); const d=img.data; const cx=Math.round(P.x), cz=Math.round(P.z);
   for(let py=0;py<S;py++) for(let px=0;px<S;px++){ const x=cx+Math.round((px-S/2)*scale), z=cz+Math.round((py-S/2)*scale); const h=height(x,z); const b=biomeAt(x,z); let r,gg,bb; if(h<=SEA){ r=90;gg=170;bb=255; } else if(h<=SEA+1){ r=236;gg=222;bb=172; } else if(b==='schnee'&&h>SEA+6){ r=240;gg=245;bb=255; } else { r=110;gg=190;bb=95; if(b==='zuckerwald'){ r=200;gg=150;bb=190; } if(b==='kristall'){ r=170;gg=140;bb=230; } if(b==='blumenwiese'){ r=180;gg=215;bb=120; } } const sh=0.75+Math.min(0.5,(h-SEA)/30); if(inVillage(x,z)){ r=r*0.8+40; gg=gg*0.8+30; bb=bb*0.8+20; } const i=(py*S+px)*4; d[i]=r*sh; d[i+1]=gg*sh; d[i+2]=bb*sh; d[i+3]=255; }
   g.putImageData(img,0,0); g.font='14px sans-serif'; g.textAlign='center'; g.textBaseline='middle'; const mark=(x,z,t)=>{ const px=S/2+(x-cx)/scale, py=S/2+(z-cz)/scale; if(px<-8||py<-8||px>S+8||py>S+8) return; g.fillText(t,px,py); };
   for(let vx=Math.floor((cx-S*scale)/VCELL);vx<=Math.floor((cx+S*scale)/VCELL);vx++) for(let vz=Math.floor((cz-S*scale)/VCELL);vz<=Math.floor((cz+S*scale)/VCELL);vz++){ const v=village(vx,vz); if(v){ mark(v.cx,v.cz,'🏘️'); if(!questsDone.has(v.id+':'+v.questIdx)) mark(v.cx,v.cz-10,'❗'); } }
-  mark(CASTLE.x,CASTLE.z,'🏰'); mark(MOUNT.x,MOUNT.z,'🏔️'); mark(HUPF.x,HUPF.z,'🟢'); if(starsDirty) refreshStars(); g.font='10px sans-serif'; for(const s of activeStars) mark(s.x,s.z,'⭐'); g.font='16px sans-serif'; mark(P.x,P.z,'🦄'); }
+  mark(CASTLE.x,CASTLE.z,'🏰'); mark(MOUNT.x,MOUNT.z,'🏔️'); mark(HUPF.x,HUPF.z,'🟢'); if(starsDirty) refreshStars(); g.font='10px sans-serif'; for(const s of activeStars) mark(s.x,s.z,'⭐'); for(const s of activeCandy) mark(s.x,s.z,'🍬'); g.font='16px sans-serif'; mark(P.x,P.z,'🦄'); }
 function photo(){ try{ document.getElementById('hud').classList.add('hidden'); renderer.render(scene,camera); const url=canvas.toDataURL('image/png'); document.getElementById('hud').classList.remove('hidden'); dialog('📸 Dein Foto',`<img src="${url}" style="width:100%;border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,.2)"><p style="text-align:center;font-size:14px;margin-top:10px">Handy: Bild gedrückt halten → „Bild sichern“ · PC: Rechtsklick → „Bild speichern“</p>`,[['Schön!',null]]); sfx('place'); }catch(e){ toast('Foto hat nicht geklappt 🙈'); } }
 function worldCode(){ try{ return btoa(unescape(encodeURIComponent(JSON.stringify([...edits])))); }catch(e){ return ''; } }
 function loadWorldCode(code){ try{ const arr=JSON.parse(decodeURIComponent(escape(atob(code.trim())))); if(!Array.isArray(arr)) throw 0; edits.clear(); for(const [k,t] of arr) if(typeof k==='number'&&typeof t==='number'&&(B[t]!==undefined||t===0)) edits.set(k,t); rebuildEditIndex(); resetWorld(); save(); toast('Welt geladen! 🌈'); }catch(e){ toast('Hm, der Code passt nicht 🙈'); } }
@@ -1186,8 +1197,8 @@ function loop(){ requestAnimationFrame(loop); const now=performance.now(); const
       activateVillages(); if(tutorial<TUT.length&&live&&stats.introSeen) tutorialTick(); if(Math.random()<0.1) saveSoon(); }
     updateNpcs(dt,timeAcc); updateLabels(); updateAnimals(dt,timeAcc); updateZombies(dt,timeAcc); updatePets(dt,timeAcc); updateWild(dt,timeAcc); updateEgg(timeAcc); if((timeAcc%2)<dt){ updateSaplings(); activeVillageCats(); placeEgg(); } updateRace(dt,timeAcc); if(chest.visible){ chest.userData.gem.rotation.y=timeAcc*2; chest.userData.gem.position.y=0.6+Math.sin(timeAcc*3)*0.08; }
   }
-  updateStars(timeAcc); updateParts(dt); updateWeather(dt,timeAcc); updateLamps(dt);
-  window.__st={x:P.x,y:P.y,z:P.z,fly:P.flying,g:P.onGround,live,dt,edits:edits.size,stars:collected.size,done:[...done],tut:tutorial,loading:loadingWorld,chunks:chunks.size,npcs:npcs.length,spells:[...spells],inv};
+  updateStars(timeAcc); updateCandy(timeAcc); updateParts(dt); updateWeather(dt,timeAcc); updateLamps(dt);
+  window.__st={x:P.x,y:P.y,z:P.z,fly:P.flying,g:P.onGround,live,dt,edits:edits.size,stars:collected.size,candy:activeCandy.length,done:[...done],tut:tutorial,loading:loadingWorld,chunks:chunks.size,npcs:npcs.length,spells:[...spells],inv};
   if(location.hash==='#dev'&&!window.__dev) window.__dev={tp:(x,y,z)=>{P.x=x;P.y=y;P.z=z;P.vx=P.vy=P.vz=0;},cam:(y,p,d)=>{camYaw=y;camPitch=p;if(d)camDist=d;},fly:v=>setFlying(v),mission,setWeather,setNight:v=>setNightQuick(v),openChest,get,height,race:RACE,startRace,village,villagesNear,npcs,talkNpc,castSpell,spells,inv,addItem,teleportTo,CAVE,dayTime:v=>{dayTime=v;},renderer,sun,scene,camera,zombies,hurt,sleepInBed,get hp(){return hp;},setZombie:v=>{zombieMode=v;updateHearts();},pets,wild,makePet,spawnWild,chests,lightVillage,village};
   renderer.render(scene,camera); }
 requestAnimationFrame(loop);
