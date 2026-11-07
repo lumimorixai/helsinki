@@ -160,7 +160,7 @@
   <div class="card">
     <button class="xbtn hidden" id="startX" title="Schließen">✕</button>
     <h1>Einhorn-Blockwelt</h1>
-    <div style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 7.1</div>
+    <div style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 7.2</div>
     <p>Eine riesige Zauberwelt voller Dörfer, Ponys, Sterne und Geheimnisse. Lerne Zaubersprüche, baue, flieg – und finde den Schatz! 🌟</p>
     <input id="nameIn" maxlength="16" placeholder="Wie heißt dein Einhorn?" value="" autocomplete="off">
     <div class="lbl">Fellfarbe</div><div class="swatches" id="swatches"></div>
@@ -741,10 +741,12 @@ function doAction(nd,forceRemove){ if(!playing()) return; if(!forceRemove && (ta
   if(!rem && !curStamp && hit.type===T.TRUHE){ openChestDialog(hit.x,hit.y,hit.z); return; }
   if(rem){ if(hit.y<=1){ toast('Ganz unten geht nicht 🙈'); return; } const inf=B[hit.type]; if(hit.type===T.TRUHE){ const k=skey(hit.x,hit.y,hit.z); const ch=chests[k]; if(ch){ for(const i in ch){ if(ch[i]>0) addItem(i,ch[i]); } delete chests[k]; } } applyChanges([[hit.x,hit.y,hit.z,0]]); const drops=dropFor(hit.type); let msg=[]; for(const [it,n] of drops){ addItem(it,n); msg.push(`${ITEM_NAMES[it]||it} ${inv[it]}`); if(it==='bett') refreshPalette(); } if(msg.length) toast('🎒 '+msg.join(' · ')); if(drops.some(d=>d[0]==='diamant'||d[0]==='apfel')) sfx('star'); spawn(hit.x,hit.y,hit.z,[inf.rainbow?RAINBOW[0]:inf.c,'#ffffff'],14,2.5,2,0.7); sfx('remove'); }
   else if(curStamp){ placeStamp(hit); return; }
-  else { const px=hit.x+hit.nx, py=hit.y+hit.ny, pz=hit.z+hit.nz; if(py<1||py>=CHY-1) return; const existing=get(px,py,pz); if(existing && !B[existing].cross && existing!==T.WASSER) return; if(isSolid(curBlock) && playerIntersects(px,py,pz)){ toast('Da stehst du gerade 🦄'); return; }
-    if(FURN_ITEM[curBlock]){ const it=FURN_ITEM[curBlock]; if(!(inv[it]>0)){ toast('Davon hast du keins mehr – im Zauberkessel bauen 🧪'); return; } inv[it]--; refreshPalette(); if(inv[it]<=0) selectBlock(T.REGEN); stats.furniture=(stats.furniture||0)+1; mission('home'); }
-    if(curBlock===T.BETT){ if(!(inv.bett>0)){ toast('Du hast kein Bett im Rucksack – hol dir eins aus einem Haus 🏠'); return; } inv.bett--; stats.bedPlaced=(stats.bedPlaced||0)+1; refreshPalette(); if(inv.bett<=0) selectBlock(T.REGEN); toast('🛏️ Bett aufgestellt – nachts antippen zum Schlafen'); }
-    applyChanges([[px,py,pz,curBlock]]); if(curBlock===T.SETZLING) plantSapling(px,py,pz); const inf=B[curBlock]; spawn(px,py+0.3,pz,inf.rainbow?RAINBOW:[inf.c,'#ffffff'],10,1.5,1.5,0.6); sfx('place'); stats.placed++; mission('first'); if(stats.placed>=100) mission('builder'); }
+  else { const px=hit.x+hit.nx, py=hit.y+hit.ny, pz=hit.z+hit.nz; if(py<1||py>=CHY-1) return; const existing=get(px,py,pz); if(existing && !B[existing].cross && existing!==T.WASSER) return; const placeT=curBlock; if(isSolid(placeT) && playerIntersects(px,py,pz)){ toast('Da stehst du gerade 🦄'); return; }
+    let after=null;
+    if(FURN_ITEM[placeT]){ const it=FURN_ITEM[placeT]; if(!(inv[it]>0)){ toast('Davon hast du keins mehr – im Zauberkessel bauen 🧪'); return; } inv[it]--; stats.furniture=(stats.furniture||0)+1; mission('home'); if(inv[it]<=0) after=T.REGEN; }
+    if(placeT===T.BETT){ if(!(inv.bett>0)){ toast('Du hast kein Bett im Rucksack – hol dir eins aus einem Haus 🏠'); return; } inv.bett--; stats.bedPlaced=(stats.bedPlaced||0)+1; if(inv.bett<=0) after=T.REGEN; toast('🛏️ Bett aufgestellt – nachts antippen zum Schlafen'); }
+    applyChanges([[px,py,pz,placeT]]); if(placeT===T.SETZLING) plantSapling(px,py,pz); const inf=B[placeT]; spawn(px,py+0.3,pz,inf.rainbow?RAINBOW:[inf.c,'#ffffff'],10,1.5,1.5,0.6); sfx('place'); stats.placed++; mission('first'); if(stats.placed>=100) mission('builder');
+    refreshPalette(); if(after!=null) selectBlock(after); }
   saveSoon(); }
 function toggleMode(){ removeMode=!removeMode; const b=document.getElementById('mode'); b.textContent=removeMode?'⛏️ Abbauen':'🧱 Bauen'; b.classList.toggle('remove',removeMode); hl.material.color.set(removeMode?0xff7070:0xffffff); }
 function selectStamp(id){ curStamp=id; curBlock=null; document.querySelectorAll('.pal').forEach(el=>el.classList.toggle('sel',el.dataset.s===id)); if(removeMode) toggleMode(); toast(STAMPS[id].e+' '+STAMPS[id].n+' – tippe auf den Boden!'); }
