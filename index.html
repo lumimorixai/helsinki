@@ -88,8 +88,12 @@
   .rec{display:flex;gap:8px;align-items:center;justify-content:space-between;background:#f6f0ff;border-radius:14px;padding:8px 10px;margin:6px 0;font-size:14px;text-align:left}
   .rec .need{font-size:12px;color:#8a7aa8}
   .rec.ok{background:#e6ffe9}
-  .mgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .mgrid .btn{min-height:44px;font-size:15px;padding:10px 8px}
+  .mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .mgrid .btn{min-height:78px;font-size:14px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;line-height:1.15}
+  .mgrid .btn .ic{font-size:28px;line-height:1}
+  .mgrid .btn.on{background:#e6ffe9}
+  .mgrid .btn.off{background:#f3f0f6;opacity:.85}
+  @media (max-height:460px){ .mgrid{grid-template-columns:repeat(4,1fr);gap:8px} .mgrid .btn{min-height:64px;font-size:13px} .mgrid .btn .ic{font-size:24px} }
   #mapc{width:100%;max-width:360px;border-radius:18px;image-rendering:pixelated;background:#9fd}
   @media (max-height:460px){ #joy{width:104px;height:104px;bottom:calc(var(--sab) + 84px);left:calc(var(--sal) + 12px)} #knob{width:46px;height:46px;margin:-23px} #jump{width:62px;height:62px;font-size:26px;bottom:calc(var(--sab) + 96px);right:calc(var(--sar) + 12px)} #flyBtn{width:50px;height:50px;font-size:22px;bottom:calc(var(--sab) + 100px);right:calc(var(--sar) + 84px)} #down{width:50px;height:50px;font-size:22px;bottom:calc(var(--sab) + 168px);right:calc(var(--sar) + 18px)} .pal{width:40px;height:40px;font-size:19px;border-radius:11px} #palette{padding:4px;gap:6px;max-width:60vw} #bottom{flex-direction:row;align-items:flex-end;justify-content:center;gap:6px;bottom:calc(var(--sab) + 6px)} #mode{min-width:0;padding:10px 12px;font-size:15px;min-height:42px} #bUndo{width:42px;height:42px} .btn.round{width:40px;height:40px;font-size:18px} .badge{font-size:13px;padding:4px 10px} #compass{font-size:12px} #top{top:calc(var(--sat) + 6px)} #toast{bottom:calc(var(--sab) + 64px);font-size:14px} }
   @media (max-width:520px){ .btn.round{width:44px;height:44px;font-size:19px} #tools{gap:6px;max-width:60%} .badge{font-size:14px;padding:6px 10px} #compass{font-size:13px} }
@@ -848,20 +852,26 @@ function goFullscreen(){ const el=document.documentElement; const req=el.request
   if(req && !isIOS){ try{ const p=req.call(el); if(p&&p.then) p.then(()=>{ try{ screen.orientation.lock('landscape').catch(()=>{}); }catch(e){} }).catch(()=>fsHint()); }catch(e){ fsHint(); } } else fsHint(); }
 function fsHint(){ dialog('⛶ Vollbild',`<p>So bekommst du das Spiel bildschirmfüllend:</p><p><b>iPhone/iPad:</b> Link in <b>Safari</b> öffnen → Teilen‑Symbol → <b>„Zum Home‑Bildschirm"</b>. Das Symbol startet das Spiel dann wie eine App ohne Browserleisten.</p><p><b>Android:</b> In Chrome öffnen → Menü ⋮ → <b>„Zum Startbildschirm hinzufügen"</b> (oder „App installieren").</p><p><b>PC:</b> Taste <b>F11</b> im Browser.</p><p style="font-size:13px">Wichtig: Der Link muss direkt im Browser geöffnet sein, nicht in der Vorschau innerhalb einer anderen App.</p>`,[['Alles klar',null]]); }
 document.getElementById('fsTog').onclick=()=>{ if(window.top!==window.self || /iPhone|iPad|iPod/.test(navigator.userAgent)) installDialog(); else goFullscreen(); };
-function openMenu(){ dialog('Menü',`<div class="mgrid" id="mgrid"></div><p style="text-align:center;font-size:12px;margin:10px 0 0">Deine Welt wird automatisch gespeichert – auf diesem Gerät. 💾</p>`,[['Weiterspielen',null]]);
-  const items=[
-    ['📜 Missionen',showMissions],['❓ Hilfe',()=>dialog('So geht\'s 🦄',helpText(),[['Alles klar!',null]])],
-    [night?'☀️ Tag machen':'🌙 Nacht machen',()=>setNightQuick(!night)],[musicOn?'🔇 Musik aus':'🎵 Musik an',toggleMusic],
-    ['📷 Kamera',()=>{ camDist = camDist<5 ? 6.5 : camDist<9 ? 12 : 3.5; toast(camDist<5?'📷 Nah dran':camDist<9?'📷 Normal':'📷 Weit weg'); }],['⛶ Vollbild',goFullscreen],
-    ['🏁 Ringe-Rennen',()=>setTimeout(startRace,100)],['📸 Foto',()=>setTimeout(photo,80)],
-    ['🌦️ Wetter & Zeit',()=>dialog('Wetter & Zeit','<p style="text-align:center">Wie soll das Wetter sein?</p>',[['☀️ Sonne',()=>setWeather('sonne')],['🌈 Glitzerregen',()=>setWeather('regen')],['❄️ Schnee',()=>setWeather('schnee')],[autoCycle?'🌗 Tag/Nacht automatisch: AN':'🌗 Tag/Nacht automatisch: AUS',()=>{ autoCycle=!autoCycle; save(); toast(autoCycle?'🌗 Tag und Nacht wechseln jetzt von selbst':'🌗 Du bestimmst Tag und Nacht'); }]])],
-    [zombieMode?'🧟 Zombies: AN':'🧟 Zombies: AUS',()=>{ zombieMode=!zombieMode; updateHearts(); save(); toast(zombieMode?"🧟 Zombies kommen nachts – pass auf dich auf!":"🧟 Keine Zombies mehr – reines Bauen"); }],
-    ['⚙️ Grafik',()=>dialog('Grafik','<p style="text-align:center">Wenn es ruckelt, stell hier runter.</p>',[['✨ Schön (Schatten, weite Sicht)',()=>{ setShadows(true); R=isTouch?3:4; save(); }],['⚡ Schnell (ohne Schatten)',()=>{ setShadows(false); R=isTouch?2:3; save(); }]])],
-    ['🌍 Welt-Code',shareDialog],['🦄 Einhorn ändern',()=>{ renderOutfits(); document.getElementById('startX').classList.remove('hidden'); document.getElementById('start').classList.remove('hidden'); }],
-    [tutorial<TUT.length?'⏭️ Tutorial überspringen':'🎓 Tutorial nochmal',()=>{ if(tutorial<TUT.length){ tutorial=TUT.length; tutBadge(); save(); toast('Tutorial übersprungen – viel Spaß!'); } else { teleportTo(0,7); setTimeout(()=>{ stats.metSternchen=0; stats.castBluehen=0; introStory(); },2500); } }],
-    ['🏠 Nach Hause',()=>teleportTo(0,7)],['🔄 Alles neu',()=>dialog('Wirklich alles neu?','<p>Alle Bauten, Sterne, Missionen und Zauber werden gelöscht.</p>',[['Nein, behalten',null],['Ja, ganz neu',()=>{ try{ localStorage.removeItem('einhorn-blockwelt'); }catch(e){} location.reload(); }]])]
-  ];
-  const g=document.getElementById('mgrid'); items.forEach(([l,fn])=>{ const b=document.createElement('button'); b.className='btn'; b.textContent=l; b.onclick=()=>{ document.getElementById('dlg').classList.add('hidden'); if(fn) fn(); }; g.appendChild(b); }); }
+function tileMenu(title,items,backFn){ dialog(title,'<div class="mgrid" id="mgrid"></div>',backFn?[['◀ Zurück',backFn]]:[['Weiterspielen',null]]); const g=document.getElementById('mgrid'); items.forEach(([ic,label,fn,state])=>{ const b=document.createElement('button'); b.className='btn'+(state==null?'':(state?' on':' off')); b.innerHTML=`<span class="ic">${ic}</span>${label}`; b.onclick=()=>{ closeDlg(); if(fn) fn(); }; g.appendChild(b); }); }
+function openMenu(){ tileMenu('Menü',[
+  ['📜','Missionen',showMissions],['🏁','Rennen',()=>setTimeout(startRace,100)],['📸','Foto',()=>setTimeout(photo,80)],
+  ['🌦️','Wetter',openWeather],['❓','Hilfe',()=>dialog('So geht\'s 🦄',helpText(),[['Alles klar!',null]])],['⚙️','Einstellungen',openSettings]
+]); }
+function openWeather(){ tileMenu('Wetter & Zeit',[
+  ['☀️','Sonne',()=>setWeather('sonne'),weather==='sonne'],['🌈','Glitzerregen',()=>setWeather('regen'),weather==='regen'],['❄️','Schnee',()=>setWeather('schnee'),weather==='schnee'],
+  [night?'🌅':'🌙',night?'Tag machen':'Nacht machen',()=>setNightQuick(!night)],['🌗',autoCycle?'Tag & Nacht wechseln: an':'Tag & Nacht wechseln: aus',()=>{ autoCycle=!autoCycle; save(); toast(autoCycle?'🌗 Tag und Nacht wechseln von selbst':'🌗 Du bestimmst Tag und Nacht'); },autoCycle]
+],openMenu); }
+function openSettings(){ tileMenu('Einstellungen',[
+  ['🎵',musicOn?'Musik: an':'Musik: aus',toggleMusic,musicOn],
+  ['🧟',zombieMode?'Zombies: an':'Zombies: aus',()=>{ zombieMode=!zombieMode; updateHearts(); save(); toast(zombieMode?'🧟 Nachts kommen Zombies – pass auf!':'🌸 Keine Zombies – nur bauen und entdecken'); },zombieMode],
+  [shadowsOn?'✨':'⚡',shadowsOn?'Grafik: schön':'Grafik: schnell',()=>{ if(shadowsOn){ setShadows(false); R=isTouch?2:3; toast('⚡ Grafik: schnell'); } else { setShadows(true); R=isTouch?3:4; toast('✨ Grafik: schön'); } save(); },shadowsOn],
+  ['📷','Kamera näher / weiter',()=>{ camDist = camDist<5 ? 6.5 : camDist<9 ? 12 : 3.5; toast(camDist<5?'📷 Nah dran':camDist<9?'📷 Normal':'📷 Weit weg'); }],
+  ['🦄','Einhorn ändern',()=>{ renderOutfits(); document.getElementById('startX').classList.remove('hidden'); document.getElementById('start').classList.remove('hidden'); }],
+  ['🏠','Nach Hause',()=>teleportTo(0,7)],
+  ['📲','Als App',installDialog],['⛶','Vollbild',goFullscreen],['🌍','Welt teilen',shareDialog],
+  ['🎓',tutorial<TUT.length?'Tutorial überspringen':'Tutorial nochmal',()=>{ if(tutorial<TUT.length){ tutorial=TUT.length; tutBadge(); buildUnicorn(uniColor,hornColor); save(); toast('Tutorial übersprungen – viel Spaß!'); } else { teleportTo(0,7); setTimeout(()=>{ stats.metSternchen=0; stats.castBluehen=0; introStory(); },2500); } }],
+  ['🔄','Alles neu',()=>dialog('Wirklich alles neu?','<p>Alle Bauten, Sterne, Missionen und Zauber werden gelöscht.</p>',[['Nein, behalten',null],['Ja, ganz neu',()=>{ try{ localStorage.removeItem('einhorn-blockwelt'); }catch(e){} location.reload(); }]])]
+],openMenu); }
 // palette
 const pal=document.getElementById('palette');
 PALETTE.forEach(t=>{ const inf=B[t]; const el=document.createElement('div'); el.className='pal'+(t===curBlock?' sel':''); el.dataset.t=t; el.textContent=inf.e; el.style.background=inf.rainbow?'linear-gradient(135deg,'+RAINBOW.join(',')+')':inf.c; el.onclick=()=>{ if(inf.locked&&!done.has('schatz')){ toast('🔒 Diamant: Finde den Schatz in der Höhle im Schneeberg!'); return; } selectBlock(t); }; pal.appendChild(el); });
@@ -879,7 +889,7 @@ function save(){ try{ localStorage.setItem('einhorn-blockwelt',JSON.stringify({v
 let saveT=null; const saveSoon=()=>{ clearTimeout(saveT); saveT=setTimeout(save,500); };
 let saved=null; try{ const s=localStorage.getItem('einhorn-blockwelt'); if(s) saved=JSON.parse(s); }catch(e){}
 if(saved){ uniName=saved.name||uniName; uniColor=saved.color||uniColor; hornColor=saved.horn||hornColor; musicOn=saved.musicOn!==false; outfit=saved.outfit||'none'; tutorial=saved.tutorial||0; weather=saved.weather||'sonne'; done=new Set(saved.done||[]); Object.assign(stats,saved.stats||{});
-  if(saved.v>=5){ autoCycle=saved.autoCycle!==false; if(typeof saved.dayTime==='number') dayTime=saved.dayTime; RACE.best=saved.best||0; (saved.edits||[]).forEach(([k,t])=>edits.set(k,t)); rebuildEditIndex(); collected=new Set(saved.collected||[]); Object.assign(inv,saved.inv||{}); spells=new Set(saved.spells||['glitzer']); questsDone=new Set(saved.questsDone||[]); visited=new Set(saved.visited||[]); knownPlaces=saved.knownPlaces||[]; lastSpell=saved.lastSpell||'glitzer'; if(saved.shadows===false) setShadows(false); if(saved.R) R=saved.R; zombieMode=saved.zombieMode!==false; if(typeof saved.hp==='number') hp=Math.max(1,saved.hp); if(saved.spawnPoint) spawnPoint=saved.spawnPoint; if(saved.checkpoint) checkpoint=saved.checkpoint; if(saved.armor){ armor=saved.armor; armorDur=saved.armorDur||0; } }
+  if(saved.v>=5){ autoCycle=saved.autoCycle!==false; dayTime=0.3; RACE.best=saved.best||0; (saved.edits||[]).forEach(([k,t])=>edits.set(k,t)); rebuildEditIndex(); collected=new Set(saved.collected||[]); Object.assign(inv,saved.inv||{}); spells=new Set(saved.spells||['glitzer']); questsDone=new Set(saved.questsDone||[]); visited=new Set(saved.visited||[]); knownPlaces=saved.knownPlaces||[]; lastSpell=saved.lastSpell||'glitzer'; if(saved.shadows===false) setShadows(false); if(saved.R) R=saved.R; zombieMode=saved.zombieMode!==false; if(typeof saved.hp==='number') hp=Math.max(1,saved.hp); if(saved.spawnPoint) spawnPoint=saved.spawnPoint; if(saved.checkpoint) checkpoint=saved.checkpoint; if(saved.armor){ armor=saved.armor; armorDur=saved.armorDur||0; } }
   else { done.delete('stars10'); done.delete('stars20'); } }
 if(saved && saved.v>=5 && typeof saved.px==='number'){ P.x=saved.px; P.y=saved.py; P.z=saved.pz; }
 
@@ -892,7 +902,7 @@ renderOutfits(); document.getElementById('nameIn').value=uniName==='Einhorn'?'':
 if(saved){ document.getElementById('newGame').classList.remove('hidden'); } document.getElementById('newGame').onclick=()=>{ dialog('🔄 Neues Spiel?','<p>Alles wird zurückgesetzt: Bauten, Sterne, Missionen, Zauber und der Rucksack. Das Tutorial startet neu.</p>',[['Abbrechen',null],['Ja, ganz neu',()=>{ try{ localStorage.removeItem('einhorn-blockwelt'); }catch(e){} location.reload(); }]]); };
 document.getElementById('startX').onclick=()=>{ document.getElementById('start').classList.add('hidden'); }; document.getElementById('starcount').textContent=collected.size; refreshPalette();
 document.getElementById('nameIn').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('go').click(); } });
-document.getElementById('go').onclick=()=>{ uniName=(document.getElementById('nameIn').value.trim()||'Einhorn').slice(0,16); document.getElementById('pname').textContent='🦄 '+uniName; buildUnicorn(uniColor,hornColor); save(); document.getElementById('start').classList.add('hidden'); document.getElementById('hud').classList.remove('hidden'); sfx('magic'); if(musicOn) startMusic();
+document.getElementById('go').onclick=()=>{ if(night||dayTime>0.65) { dayTime=0.3; applySky(); } uniName=(document.getElementById('nameIn').value.trim()||'Einhorn').slice(0,16); document.getElementById('pname').textContent='🦄 '+uniName; buildUnicorn(uniColor,hornColor); save(); document.getElementById('start').classList.add('hidden'); document.getElementById('hud').classList.remove('hidden'); sfx('magic'); if(musicOn) startMusic();
   if(!started){ started=true; if(tutorial>=TUT.length) toast('Willkommen zurück! 🌟',true); else if(tutorial===0 && !stats.introSeen){ stats.introSeen=1; setTimeout(introStory,600); } else { tutShown=-1; setTimeout(tutorialTick,1200); } } };
 const TUT=[
   {t:'Lauf los! '+(isTouch?'Schieb den Joystick unten links. 🕹️':'Drück W A S D oder die Pfeiltasten. 🏃'), check:()=>Math.hypot(P.x-tutStart.x,P.z-tutStart.z)>3},
