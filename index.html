@@ -146,6 +146,7 @@
   <div class="card">
     <button class="xbtn hidden" id="startX" title="Schließen">✕</button>
     <h1>Einhorn-Blockwelt</h1>
+    <div style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 6.1</div>
     <p>Eine riesige Zauberwelt voller Dörfer, Ponys, Sterne und Geheimnisse. Lerne Zaubersprüche, baue, flieg – und finde den Schatz! 🌟</p>
     <input id="nameIn" maxlength="16" placeholder="Wie heißt dein Einhorn?" value="" autocomplete="off">
     <div class="lbl">Fellfarbe</div><div class="swatches" id="swatches"></div>
@@ -853,7 +854,7 @@ function goFullscreen(){ const el=document.documentElement; const req=el.request
 function fsHint(){ dialog('⛶ Vollbild',`<p>So bekommst du das Spiel bildschirmfüllend:</p><p><b>iPhone/iPad:</b> Link in <b>Safari</b> öffnen → Teilen‑Symbol → <b>„Zum Home‑Bildschirm"</b>. Das Symbol startet das Spiel dann wie eine App ohne Browserleisten.</p><p><b>Android:</b> In Chrome öffnen → Menü ⋮ → <b>„Zum Startbildschirm hinzufügen"</b> (oder „App installieren").</p><p><b>PC:</b> Taste <b>F11</b> im Browser.</p><p style="font-size:13px">Wichtig: Der Link muss direkt im Browser geöffnet sein, nicht in der Vorschau innerhalb einer anderen App.</p>`,[['Alles klar',null]]); }
 document.getElementById('fsTog').onclick=()=>{ if(window.top!==window.self || /iPhone|iPad|iPod/.test(navigator.userAgent)) installDialog(); else goFullscreen(); };
 function tileMenu(title,items,backFn){ dialog(title,'<div class="mgrid" id="mgrid"></div>',backFn?[['◀ Zurück',backFn]]:[['Weiterspielen',null]]); const g=document.getElementById('mgrid'); items.forEach(([ic,label,fn,state])=>{ const b=document.createElement('button'); b.className='btn'+(state==null?'':(state?' on':' off')); b.innerHTML=`<span class="ic">${ic}</span>${label}`; b.onclick=()=>{ closeDlg(); if(fn) fn(); }; g.appendChild(b); }); }
-function openMenu(){ tileMenu('Menü',[
+function openMenu(){ tileMenu('Menü <span style="font-size:12px;color:#8a7aa8">v6.1</span>',[
   ['📜','Missionen',showMissions],['🏁','Rennen',()=>setTimeout(startRace,100)],['📸','Foto',()=>setTimeout(photo,80)],
   ['🌦️','Wetter',openWeather],['❓','Hilfe',()=>dialog('So geht\'s 🦄',helpText(),[['Alles klar!',null]])],['⚙️','Einstellungen',openSettings]
 ]); }
@@ -885,13 +886,14 @@ document.getElementById('mode').onclick=toggleMode; document.getElementById('bUn
 
 // ================= Save / load =================
 let uniName='Einhorn', uniColor='#ffffff', hornColor='#ffd84d', tutorial=0; let visited=new Set(), knownPlaces=[];
-function save(){ try{ localStorage.setItem('einhorn-blockwelt',JSON.stringify({v:5,zombieMode,hp,spawnPoint,checkpoint,armor,armorDur,name:uniName,color:uniColor,horn:hornColor,musicOn,outfit,tutorial,weather,autoCycle,dayTime,best:RACE.best,shadows:shadowsOn,R,px:P.x,py:P.y,pz:P.z,edits:[...edits],collected:[...collected],done:[...done],stats,inv,spells:[...spells],questsDone:[...questsDone],visited:[...visited],knownPlaces,lastSpell})); }catch(e){} }
+function save(){ try{ localStorage.setItem('einhorn-blockwelt',JSON.stringify({v:6,zombieMode,hp,spawnPoint,checkpoint,armor,armorDur,name:uniName,color:uniColor,horn:hornColor,musicOn,outfit,tutorial,weather,autoCycle,dayTime,best:RACE.best,shadows:shadowsOn,R,px:P.x,py:P.y,pz:P.z,edits:[...edits],collected:[...collected],done:[...done],stats,inv,spells:[...spells],questsDone:[...questsDone],visited:[...visited],knownPlaces,lastSpell})); }catch(e){} }
 let saveT=null; const saveSoon=()=>{ clearTimeout(saveT); saveT=setTimeout(save,500); };
 let saved=null; try{ const s=localStorage.getItem('einhorn-blockwelt'); if(s) saved=JSON.parse(s); }catch(e){}
 if(saved){ uniName=saved.name||uniName; uniColor=saved.color||uniColor; hornColor=saved.horn||hornColor; musicOn=saved.musicOn!==false; outfit=saved.outfit||'none'; tutorial=saved.tutorial||0; weather=saved.weather||'sonne'; done=new Set(saved.done||[]); Object.assign(stats,saved.stats||{});
   if(saved.v>=5){ autoCycle=saved.autoCycle!==false; dayTime=0.3; RACE.best=saved.best||0; (saved.edits||[]).forEach(([k,t])=>edits.set(k,t)); rebuildEditIndex(); collected=new Set(saved.collected||[]); Object.assign(inv,saved.inv||{}); spells=new Set(saved.spells||['glitzer']); questsDone=new Set(saved.questsDone||[]); visited=new Set(saved.visited||[]); knownPlaces=saved.knownPlaces||[]; lastSpell=saved.lastSpell||'glitzer'; if(saved.shadows===false) setShadows(false); if(saved.R) R=saved.R; zombieMode=saved.zombieMode!==false; if(typeof saved.hp==='number') hp=Math.max(1,saved.hp); if(saved.spawnPoint) spawnPoint=saved.spawnPoint; if(saved.checkpoint) checkpoint=saved.checkpoint; if(saved.armor){ armor=saved.armor; armorDur=saved.armorDur||0; } }
   else { done.delete('stars10'); done.delete('stars20'); } }
 if(saved && saved.v>=5 && typeof saved.px==='number'){ P.x=saved.px; P.y=saved.py; P.z=saved.pz; }
+if(saved && (saved.v||0)<6){ tutorial=0; stats.introSeen=0; stats.metSternchen=0; stats.castBluehen=0; stats.flew=0; }
 
 // ================= Start screen =================
 const sw=document.getElementById('swatches'); UNI_COLORS.forEach(([n,c])=>{ const d=document.createElement('div'); d.className='sw'+(c===uniColor?' sel':''); d.style.background=c; d.title=n; d.onclick=()=>{ uniColor=c; [...sw.children].forEach(x=>x.classList.toggle('sel',x===d)); }; sw.appendChild(d); });
