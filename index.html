@@ -88,6 +88,20 @@
   .rec{display:flex;gap:8px;align-items:center;justify-content:space-between;background:#f6f0ff;border-radius:14px;padding:8px 10px;margin:6px 0;font-size:14px;text-align:left}
   .rec .need{font-size:12px;color:#8a7aa8}
   .rec.ok{background:#e6ffe9}
+  .goal{background:linear-gradient(135deg,#fff3a0,#ffd1e8);border-radius:16px;padding:10px 12px;font-size:15px;text-align:center}
+  .prog{margin:10px 0 4px}
+  .prog .bar{height:16px;border-radius:10px;background:#efe8ff;overflow:hidden}
+  .prog .bar i{display:block;height:100%;background:linear-gradient(90deg,#ff7bb0,#ffe066,#6fe38a,#6ec3ff);transition:width .4s}
+  .prog .ptxt{text-align:center;font-size:13px;color:#8a7aa8;margin-top:4px}
+  .sec{font-weight:800;margin:12px 0 4px;font-size:15px;cursor:pointer;text-align:left}
+  details > summary{list-style:none}
+  .mcard{display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:16px;background:#f6f0ff;margin:6px 0;font-size:15px;text-align:left}
+  .mcard .ic{font-size:30px;width:40px;text-align:center;flex:0 0 40px}
+  .mcard.now{background:#fff;border:3px solid #ffb6dc}
+  .mcard.gift{background:#fff8dc;border:3px dashed #ffd84d}
+  .mcard.done{background:#e6ffe9;opacity:.75}
+  .mcard.done .tx{text-decoration:none}
+  .mcard small{color:#8a7aa8}
   .mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
   .mgrid .btn{min-height:78px;font-size:14px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;line-height:1.15}
   .mgrid .btn .ic{font-size:28px;line-height:1}
@@ -146,7 +160,7 @@
   <div class="card">
     <button class="xbtn hidden" id="startX" title="Schließen">✕</button>
     <h1>Einhorn-Blockwelt</h1>
-    <div style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 6.1</div>
+    <div style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 6.2</div>
     <p>Eine riesige Zauberwelt voller Dörfer, Ponys, Sterne und Geheimnisse. Lerne Zaubersprüche, baue, flieg – und finde den Schatz! 🌟</p>
     <input id="nameIn" maxlength="16" placeholder="Wie heißt dein Einhorn?" value="" autocomplete="off">
     <div class="lbl">Fellfarbe</div><div class="swatches" id="swatches"></div>
@@ -784,7 +798,18 @@ function mission(id){ if(done.has(id)) return; done.add(id); saveSoon(); const m
   const n=missionsDone(); const gr=GROWTH.find(g=>g[0]===n); if(gr){ setTimeout(()=>{ buildUnicorn(uniColor,hornColor); sfx('fanfare'); for(let i=0;i<4;i++) setTimeout(()=>spawn(P.x,P.y+1.5,P.z,RAINBOW,60,4,4,1.5),i*200); dialog('✨ Dein Einhorn verwandelt sich!',`<p style="text-align:center;font-size:40px;margin:4px">${gr[1].split(' ')[0]}</p><p style="text-align:center">Mit ${n} Missionen hast du dir verdient:<br><b>${gr[1]}</b></p>`,[['Wow! 🦄',null]]); },1600); }
   const unlocked=Object.entries(OUTFITS).find(([k,o])=>o.need===n&&k!=='none'&&k!=='krone'); if(unlocked) setTimeout(()=>{ toast(`${unlocked[1].e} Neues Outfit: ${unlocked[1].n}! (Menü → Einhorn ändern)`,true); sfx('fanfare'); },2800);
   if(MISSIONS.every(x=>done.has(x[0])) && !done.has('all')){ done.add('all'); saveSoon(); setTimeout(()=>{ outfit='krone'; buildUnicorn(uniColor,hornColor); sfx('fanfare'); for(let i=0;i<8;i++) setTimeout(()=>spawn(P.x,P.y+2,P.z,RAINBOW,80,8,7,2),i*250); dialog('👑 Alle Missionen geschafft!',`<p style="text-align:center">Unglaublich, ${esc(uniName)}! Du hast jede einzelne Mission gemeistert.<br><br>Dafür bekommst du die <b>goldene Einhorn-Krone</b> 👑✨</p>`,[['Juhu! 🦄',null]]); },600); } }
-function showMissions(){ const html='<div class="m" style="background:linear-gradient(135deg,#fff3a0,#ffd1e8)"><span class="ic">🎯</span><span><b>Dein großes Ziel:</b> Hilf den Dörfern, lerne alle 6 Zauber, finde den Schatz im Schneeberg – und werde mit allen Missionen zur Einhorn‑Königin 👑</span></div><div class="missions">'+MISSIONS.map(([id,ic,txt])=>`<div class="m ${done.has(id)?'done':''}"><span class="ic">${done.has(id)?'✅':ic}</span><span>${txt}</span></div>`).join('')+'</div>'+(done.has('all')?'<p style="text-align:center">👑 Du trägst die Einhorn-Krone!</p>':`<p style="text-align:center;font-size:14px">${missionsDone()} von ${MISSIONS.length} geschafft – Outfits gibt es bei 4, 8 und 12, am Ende die Krone 👑</p>`); dialog('📜 Missionen',html,[['Weiter!',null]]); }
+function showMissions(){ const n=missionsDone(), total=MISSIONS.length; const pct=Math.round(n/total*100);
+  const ORDER=['first','stars10','fly','swim','bunny','builder','castle','magic','sleep','bounce','craft','stars20','villages','spell1','race','schatz','zombies','stars50','allspells']; const openAll=MISSIONS.filter(m=>!done.has(m[0])).sort((a,b)=>ORDER.indexOf(a[0])-ORDER.indexOf(b[0])); const open=openAll.slice(0,3); const rest=openAll.slice(3); const doneList=MISSIONS.filter(m=>done.has(m[0]));
+  const nextGrowth=GROWTH.find(g=>n<g[0]);
+  const card=(m,cls)=>`<div class="mcard ${cls||''}"><span class="ic">${m[1]}</span><span class="tx">${m[2]}</span></div>`;
+  let html=`<div class="goal">🎯 <b>Dein Ziel:</b> Werde zur Einhorn‑Königin 👑</div>
+  <div class="prog"><div class="bar"><i style="width:${pct}%"></i></div><div class="ptxt">${n} von ${total} geschafft</div></div>`;
+  if(tutorial<TUT.length) html+=`<div class="mcard now"><span class="ic">🍼</span><span class="tx">Erst das Tutorial beenden – dann wächst dein Baby‑Einhorn!</span></div>`;
+  html+=`<div class="sec">⭐ Jetzt dran</div>`+(open.length?open.map(m=>card(m,'now')).join(''):'<div class="mcard done"><span class="ic">👑</span><span class="tx">Alles geschafft!</span></div>');
+  if(nextGrowth) html+=`<div class="sec">🎁 Nächste Belohnung</div><div class="mcard gift"><span class="ic">${nextGrowth[1].split(' ')[0]}</span><span class="tx">${nextGrowth[1].replace(/^\S+\s/,'')}<br><small>noch ${nextGrowth[0]-n} Mission${nextGrowth[0]-n===1?'':'en'}</small></span></div>`;
+  if(rest.length) html+=`<details><summary class="sec">📋 Später (${rest.length})</summary>${rest.map(m=>card(m,'')).join('')}</details>`;
+  if(doneList.length) html+=`<details><summary class="sec">✅ Geschafft (${doneList.length})</summary>${doneList.map(m=>card(m,'done')).join('')}</details>`;
+  dialog('📜 Missionen',html,[['Weiter!',null]]); }
 const GROWTH=[[3,'🌈 Bunte Mähne','mane'],[6,'🎀 Bunter Schweif','tail'],[9,'✨ Leuchtendes Horn in deiner Farbe','horn'],[13,'⭐ Goldene Hufe','hoof']];
 function growthOpts(){ const n=missionsDone(); const baby=tutorial<TUT.length; const plain=['#e9ddff','#f6edff']; return {armor,baby,mane:n>=3?RAINBOW:plain,tail:n>=6?RAINBOW:plain,plainHorn:n<9,hoof:n>=13?'#ffd84d':'#d9cfc4'}; }
 function buildUnicorn(color,horn){ while(uni.children.length) uni.remove(uni.children[0]); rainbowFur=/regenbogen|rainbow/i.test(uniName); if(!outfitUnlocked(outfit)) outfit='none'; const U=makeUnicorn(color,horn,outfit,growthOpts()); uni.add(U.g); legs=U.legs; maneCubes=U.mane; tailCubes=U.tail; wings=U.wings; crown=U.crown; wings.forEach(w=>w.visible=P.flying); }
@@ -871,7 +896,7 @@ function openSettings(){ tileMenu('Einstellungen',[
   ['🏠','Nach Hause',()=>teleportTo(0,7)],
   ['📲','Als App',installDialog],['⛶','Vollbild',goFullscreen],['🌍','Welt teilen',shareDialog],
   ['🎓',tutorial<TUT.length?'Tutorial überspringen':'Tutorial nochmal',()=>{ if(tutorial<TUT.length){ tutorial=TUT.length; tutBadge(); buildUnicorn(uniColor,hornColor); save(); toast('Tutorial übersprungen – viel Spaß!'); } else { teleportTo(0,7); setTimeout(()=>{ stats.metSternchen=0; stats.castBluehen=0; introStory(); },2500); } }],
-  ['🔄','Alles neu',()=>dialog('Wirklich alles neu?','<p>Alle Bauten, Sterne, Missionen und Zauber werden gelöscht.</p>',[['Nein, behalten',null],['Ja, ganz neu',()=>{ try{ localStorage.removeItem('einhorn-blockwelt'); }catch(e){} location.reload(); }]])]
+  ['🔄','Alles neu',()=>dialog('Wirklich alles neu?','<p>Alle Bauten, Sterne, Missionen und Zauber werden gelöscht.</p>',[['Nein, behalten',null],['Ja, ganz neu',hardReset]])]
 ],openMenu); }
 // palette
 const pal=document.getElementById('palette');
@@ -886,7 +911,8 @@ document.getElementById('mode').onclick=toggleMode; document.getElementById('bUn
 
 // ================= Save / load =================
 let uniName='Einhorn', uniColor='#ffffff', hornColor='#ffd84d', tutorial=0; let visited=new Set(), knownPlaces=[];
-function save(){ try{ localStorage.setItem('einhorn-blockwelt',JSON.stringify({v:6,zombieMode,hp,spawnPoint,checkpoint,armor,armorDur,name:uniName,color:uniColor,horn:hornColor,musicOn,outfit,tutorial,weather,autoCycle,dayTime,best:RACE.best,shadows:shadowsOn,R,px:P.x,py:P.y,pz:P.z,edits:[...edits],collected:[...collected],done:[...done],stats,inv,spells:[...spells],questsDone:[...questsDone],visited:[...visited],knownPlaces,lastSpell})); }catch(e){} }
+let resetting=false; function hardReset(){ resetting=true; try{ localStorage.removeItem('einhorn-blockwelt'); localStorage.removeItem('einhorn-help2'); }catch(e){} if(navigator.serviceWorker&&navigator.serviceWorker.controller){ caches&&caches.keys().then(k=>Promise.all(k.map(x=>caches.delete(x)))).finally(()=>location.reload()); } else location.reload(); }
+function save(){ if(resetting) return; try{ localStorage.setItem('einhorn-blockwelt',JSON.stringify({v:6,zombieMode,hp,spawnPoint,checkpoint,armor,armorDur,name:uniName,color:uniColor,horn:hornColor,musicOn,outfit,tutorial,weather,autoCycle,dayTime,best:RACE.best,shadows:shadowsOn,R,px:P.x,py:P.y,pz:P.z,edits:[...edits],collected:[...collected],done:[...done],stats,inv,spells:[...spells],questsDone:[...questsDone],visited:[...visited],knownPlaces,lastSpell})); }catch(e){} }
 let saveT=null; const saveSoon=()=>{ clearTimeout(saveT); saveT=setTimeout(save,500); };
 let saved=null; try{ const s=localStorage.getItem('einhorn-blockwelt'); if(s) saved=JSON.parse(s); }catch(e){}
 if(saved){ uniName=saved.name||uniName; uniColor=saved.color||uniColor; hornColor=saved.horn||hornColor; musicOn=saved.musicOn!==false; outfit=saved.outfit||'none'; tutorial=saved.tutorial||0; weather=saved.weather||'sonne'; done=new Set(saved.done||[]); Object.assign(stats,saved.stats||{});
@@ -901,7 +927,7 @@ const hw=document.getElementById('horns'); HORN_COLORS.forEach(([n,c])=>{ const 
 function renderOutfits(){ const ow=document.getElementById('outfits'); ow.innerHTML=''; Object.entries(OUTFITS).forEach(([id,o])=>{ const d=document.createElement('div'); const ok=outfitUnlocked(id); d.className='sw'+(id===outfit?' sel':''); d.style.background=ok?'#fff0fa':'#eee'; d.style.display='flex'; d.style.alignItems='center'; d.style.justifyContent='center'; d.style.fontSize='22px'; d.textContent=ok?o.e:'🔒'; d.title=ok?o.n:`${o.n}: ab ${o.need} Missionen`; d.onclick=()=>{ if(!ok){ toast(`🔒 ${o.n}: ab ${o.need===99?'allen':o.need} Missionen`); return; } outfit=id; [...ow.children].forEach(x=>x.classList.toggle('sel',x===d)); }; ow.appendChild(d); }); }
 function renderZombieTog(){ document.getElementById('zombieTogTxt').textContent=zombieMode?'an':'aus'; } renderZombieTog(); document.getElementById('zombieTog').onclick=()=>{ zombieMode=!zombieMode; renderZombieTog(); updateHearts(); save(); };
 renderOutfits(); document.getElementById('nameIn').value=uniName==='Einhorn'?'':uniName;
-if(saved){ document.getElementById('newGame').classList.remove('hidden'); } document.getElementById('newGame').onclick=()=>{ dialog('🔄 Neues Spiel?','<p>Alles wird zurückgesetzt: Bauten, Sterne, Missionen, Zauber und der Rucksack. Das Tutorial startet neu.</p>',[['Abbrechen',null],['Ja, ganz neu',()=>{ try{ localStorage.removeItem('einhorn-blockwelt'); }catch(e){} location.reload(); }]]); };
+if(saved){ document.getElementById('newGame').classList.remove('hidden'); } document.getElementById('newGame').onclick=()=>{ dialog('🔄 Neues Spiel?','<p>Alles wird zurückgesetzt: Bauten, Sterne, Missionen, Zauber und der Rucksack. Das Tutorial startet neu.</p>',[['Abbrechen',null],['Ja, ganz neu',hardReset]]); };
 document.getElementById('startX').onclick=()=>{ document.getElementById('start').classList.add('hidden'); }; document.getElementById('starcount').textContent=collected.size; refreshPalette();
 document.getElementById('nameIn').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('go').click(); } });
 document.getElementById('go').onclick=()=>{ if(night||dayTime>0.65) { dayTime=0.3; applySky(); } uniName=(document.getElementById('nameIn').value.trim()||'Einhorn').slice(0,16); document.getElementById('pname').textContent='🦄 '+uniName; buildUnicorn(uniColor,hornColor); save(); document.getElementById('start').classList.add('hidden'); document.getElementById('hud').classList.remove('hidden'); sfx('magic'); if(musicOn) startMusic();
