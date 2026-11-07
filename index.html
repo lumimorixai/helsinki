@@ -115,6 +115,9 @@
   .nlabel.q{background:linear-gradient(135deg,#fff3a0,#ffd1e8)}
   body.hurt canvas#c{filter:brightness(1.1) sepia(.4) hue-rotate(-40deg)}
   .tog{display:inline-flex;gap:8px;align-items:center;background:#f6f0ff;border-radius:14px;padding:8px 14px;cursor:pointer;font-weight:800;margin-top:8px}
+  body.racing #bottom, body.racing #tools, body.racing #tut{display:none !important}
+  body.racing #raceStop{display:inline-block !important}
+  body.racing #race{font-size:17px;background:linear-gradient(135deg,#fff3a0,#ffd1e8)}
   #loading{position:fixed;inset:0;display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.3);z-index:20;pointer-events:none}
   #bar{width:220px;height:12px;border-radius:8px;background:rgba(255,255,255,.4);overflow:hidden}
   #bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff7bb0,#ffe066);transition:width .2s}
@@ -131,6 +134,7 @@
       <div class="badge"><span id="pname">🦄 Einhorn</span><span class="stars">🌟 <span id="starcount">0</span></span><span id="hearts" class="hidden"></span></div>
       <div class="badge" id="compass"><span id="arrow">⬆️</span><span id="compassTxt">Stern</span><span id="place"></span></div>
       <div class="badge hidden" id="race">🏁 <span id="raceTxt"></span></div>
+      <button class="btn small hidden" id="raceStop" style="background:linear-gradient(135deg,#ff6f91,#ffb36b);color:#fff">⏹ Rennen beenden</button>
       <div class="badge hidden" id="tut" style="font-size:13px;padding:5px 11px;max-width:min(78vw,420px);white-space:normal;line-height:1.25;background:linear-gradient(135deg,#fff3a0,#ffd1e8)"></div>
       <div class="badge hidden" id="buff" style="font-size:13px;padding:4px 10px"></div>
     </div>
@@ -160,7 +164,7 @@
   <div class="card">
     <button class="xbtn hidden" id="startX" title="Schließen">✕</button>
     <h1>Einhorn-Blockwelt</h1>
-    <div style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 7.6</div>
+    <div style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 7.7</div>
     <p>Eine riesige Zauberwelt voller Dörfer, Ponys, Sterne und Geheimnisse. Lerne Zaubersprüche, baue, flieg – und finde den Schatz! 🌟</p>
     <input id="nameIn" maxlength="16" placeholder="Wie heißt dein Einhorn?" value="" autocomplete="off">
     <div class="lbl">Fellfarbe</div><div class="swatches" id="swatches"></div>
@@ -735,7 +739,7 @@ function placeStamp(hit){ const def=STAMPS[curStamp]; if(!def) return; let bx=hi
   const q=((Math.round(camYaw/(Math.PI/2))%4)+4)%4; const rot=(x,z)=>{ for(let i=0;i<q;i++){ const t=x; x=-z; z=t; } return [x,z]; };
   const list=[]; for(const [dx,dy,dz,t] of def.f()){ const [rx,rz]=rot(dx,dz); const x=bx+rx,y=by+dy,z=bz+rz; if(y<1||y>=CHY-1) continue; const ex=get(x,y,z); if(curStamp!=='teich'&&curStamp!=='bruecke'&&dy>=0 && ex && !B[ex].cross) continue; if(isSolid(t)&&playerIntersects(x,y,z)) continue; list.push([x,y,z,t]); }
   const n=applyChanges(list); if(!n){ toast('Hier ist kein Platz 🙈'); return; } stats.placed+=n; mission('first'); if(stats.placed>=100) mission('builder'); spawn(bx,by+1.5,bz,RAINBOW,60,4,4,1.2); sfx('magic'); saveSoon(); toast(def.e+' '+def.n+' gebaut!'); }
-function doAction(nd,forceRemove){ if(!playing()) return; if(!forceRemove && (tapStar(nd)||tapCandy(nd)||tapZombie(nd)||tapPet(nd)||tapWild(nd)||tapNpc(nd)||tapBunny(nd))) return; const rem=forceRemove||removeMode;
+function doAction(nd,forceRemove){ if(!playing()) return; if(RACE.on) return; if(!forceRemove && (tapStar(nd)||tapCandy(nd)||tapZombie(nd)||tapPet(nd)||tapWild(nd)||tapNpc(nd)||tapBunny(nd))) return; const rem=forceRemove||removeMode;
   const hit=raycast(nd,camDist+10,!rem&&!curStamp); if(!hit) return;
   if(!rem && !curStamp && hit.type===T.BETT){ sleepInBed(hit.x,hit.y,hit.z); return; }
   if(!rem && !curStamp && (hit.type===T.TUER||hit.type===T.TUER_OFFEN)){ toggleDoor(hit.x,hit.y,hit.z); return; }
@@ -880,13 +884,18 @@ function growthOpts(){ const n=missionsDone(); const baby=tutorial<TUT.length; c
 function buildUnicorn(color,horn){ while(uni.children.length) uni.remove(uni.children[0]); rainbowFur=/regenbogen|rainbow/i.test(uniName); if(!outfitUnlocked(outfit)) outfit='none'; const U=makeUnicorn(color,horn,outfit,growthOpts()); uni.add(U.g); legs=U.legs; maneCubes=U.mane; tailCubes=U.tail; wings=U.wings; crown=U.crown; wings.forEach(w=>w.visible=P.flying); }
 
 // ================= Race =================
-const RACE={on:false,rings:[],idx:0,t0:0,best:0}; const ringGeo=new THREE.TorusGeometry(0.9,0.12,8,20);
-function clearRace(){ for(const r of RACE.rings) scene.remove(r.m); RACE.rings=[]; RACE.on=false; document.getElementById('race').classList.add('hidden'); }
-function startRace(){ clearRace(); let x=P.x, z=P.z, ang=Math.random()*Math.PI*2; for(let i=0;i<8;i++){ ang+=(Math.random()-0.5)*1.6; x=x+Math.cos(ang)*7; z=z+Math.sin(ang)*7; const gx=Math.round(x), gz=Math.round(z); const y=Math.max(topY(gx,gz),SEA)+(i%3===2?5:2.2); const m=new THREE.Mesh(ringGeo,new THREE.MeshLambertMaterial({color:RAINBOW[i%7],emissive:RAINBOW[i%7],emissiveIntensity:0.25,transparent:true,opacity:0.95})); m.position.set(gx,y,gz); m.rotation.y=ang+Math.PI/2; scene.add(m); RACE.rings.push({m,x:gx,y,z:gz,hit:false}); } RACE.on=true; RACE.idx=0; RACE.t0=performance.now(); document.getElementById('race').classList.remove('hidden'); toast('🏁 Los! Flieg oder lauf durch alle 8 Ringe!',true); sfx('fanfare'); }
-function updateRace(dt,time){ if(!RACE.on) return; const el=document.getElementById('raceTxt'); const t=(performance.now()-RACE.t0)/1000; RACE.rings.forEach((r,i)=>{ r.m.rotation.z=time*(i===RACE.idx?3:0.6); const sc=i===RACE.idx?1.25+Math.sin(time*6)*0.1:(r.hit?0.001:0.8); r.m.scale.set(sc,sc,sc); r.m.material.opacity=i===RACE.idx?1:0.55; });
-  const r=RACE.rings[RACE.idx]; if(r && Math.abs(P.x-r.x)<1.3 && Math.abs(P.z-r.z)<1.3 && P.y+0.8>r.y-1.3 && P.y+0.8<r.y+1.3){ r.hit=true; spawn(r.x,r.y,r.z,[RAINBOW[RACE.idx%7],'#ffffff'],30,3,3,0.8); sfx('star'); RACE.idx++; if(RACE.idx>=RACE.rings.length){ const tt=Math.round(t*10)/10; RACE.on=false; const best=!RACE.best||tt<RACE.best; if(best) RACE.best=tt; save(); if(tt<60) mission('race'); setTimeout(()=>{ for(let i=0;i<4;i++) setTimeout(()=>spawn(P.x,P.y+2,P.z,RAINBOW,60,6,6,1.5),i*200); sfx('fanfare'); dialog('🏁 Geschafft!',`<p style="text-align:center">Alle 8 Ringe in <b>${tt} Sekunden</b>!${best?'<br>🏆 Neue Bestzeit!':`<br>Bestzeit: ${RACE.best} s`}</p>`,[['Nochmal! 🏁',()=>setTimeout(startRace,100)],['Fertig',clearRace]]); },200); return; } }
-  el.textContent=`${RACE.idx}/8 · ${t.toFixed(1)} s`+(RACE.best?` · Best ${RACE.best}`:''); }
-
+const RACE={on:false,rings:[],idx:0,t0:0,best:0,countdown:0}; const ringGeo=new THREE.TorusGeometry(1.1,0.14,8,24);
+function clearRace(){ for(const r of RACE.rings) scene.remove(r.m); RACE.rings=[]; RACE.on=false; RACE.countdown=0; document.body.classList.remove('racing'); document.getElementById('race').classList.add('hidden'); }
+function startRace(){ clearRace(); const n=10; const cx=P.x, cz=P.z; const rad=14; const a0=Math.atan2(-Math.sin(camYaw),-Math.cos(camYaw));
+  for(let i=0;i<n;i++){ const a=a0+(i/n)*Math.PI*2; const rr=rad+Math.sin(i*1.7)*3; const gx=Math.round(cx+Math.sin(a)*rr), gz=Math.round(cz+Math.cos(a)*rr); const g=Math.max(height(gx,gz),SEA); const y=g+2.5+[0,1,3,5,2,0,4,6,3,1][i]; const m=new THREE.Mesh(ringGeo,new THREE.MeshLambertMaterial({color:RAINBOW[i%7],emissive:RAINBOW[i%7],emissiveIntensity:0.35,transparent:true,opacity:0.95})); m.position.set(gx,y,gz); m.rotation.y=a+Math.PI/2; m.castShadow=false; scene.add(m); RACE.rings.push({m,x:gx,y,z:gz,hit:false}); }
+  RACE.on=true; RACE.idx=0; RACE.countdown=3.999; RACE.cdEnd=performance.now()+4000; RACE.lastCd=4; document.body.classList.add('racing'); document.getElementById('race').classList.remove('hidden'); if(!P.flying){ setFlying(true); P.vy=3; } sfx('mission'); }
+function raceEnd(finished){ const tt=Math.round((performance.now()-RACE.t0)/100)/10; clearRace(); if(!finished){ toast('🏁 Rennen beendet'); return; } const best=!RACE.best||tt<RACE.best; if(best) RACE.best=tt; save(); if(tt<60) mission('race'); setTimeout(()=>{ for(let i=0;i<4;i++) setTimeout(()=>spawn(P.x,P.y+2,P.z,RAINBOW,60,6,6,1.5),i*200); sfx('fanfare'); dialog('🏁 Ziel!',`<p style="text-align:center">Alle 10 Ringe in <b>${tt} Sekunden</b>!${best?'<br>🏆 Neue Bestzeit!':`<br>Bestzeit: ${RACE.best} s`}</p>`,[['Nochmal! 🏁',()=>setTimeout(startRace,100)],['Fertig',null]]); },200); }
+function updateRace(dt,time){ if(!RACE.on) return; const el=document.getElementById('raceTxt');
+  if(RACE.countdown>0){ RACE.countdown=(RACE.cdEnd-performance.now())/1000; const now=Math.max(0,Math.ceil(RACE.countdown)); if(now!==RACE.lastCd){ RACE.lastCd=now; if(now>0){ toast(now+' …',true); sfx('place'); } else { toast('🏁 LOS!',true); sfx('star'); RACE.t0=performance.now(); } } el.textContent=`Gleich geht's los … ${Math.max(1,now)}`; }
+  RACE.rings.forEach((r,i)=>{ r.m.rotation.z=time*(i===RACE.idx?3:0.8); const sc=i===RACE.idx?1.2+Math.sin(time*6)*0.1:0.85; r.m.scale.set(sc,sc,sc); r.m.material.opacity=i===RACE.idx?1:(i<RACE.idx?0:0.5); r.m.visible=i>=RACE.idx; });
+  if(RACE.countdown>0) return; const t=(performance.now()-RACE.t0)/1000;
+  const r=RACE.rings[RACE.idx]; if(r){ const dx=P.x-r.x, dy=(P.y+0.9)-r.y, dz=P.z-r.z; if(Math.sqrt(dx*dx+dy*dy+dz*dz)<2.1){ r.hit=true; scene.remove(r.m); spawn(r.x,r.y,r.z,[RAINBOW[RACE.idx%7],'#ffffff'],40,3,3,0.9); sfx('star'); RACE.idx++; if(RACE.idx>=RACE.rings.length){ raceEnd(true); return; } toast(`Ring ${RACE.idx} von ${RACE.rings.length}!`); } }
+  el.textContent=`${RACE.idx}/${RACE.rings.length} · ${t.toFixed(1)} s`+(RACE.best?` · Best ${RACE.best}`:''); }
 // ================= Treasure chest =================
 const chest=new THREE.Group(); { const base=new THREE.Mesh(new THREE.BoxGeometry(0.9,0.5,0.6),new THREE.MeshLambertMaterial({color:'#a9743f'})); base.position.y=0.25; chest.add(base); const lid=new THREE.Group(); lid.position.set(0,0.5,-0.3); const lm=new THREE.Mesh(new THREE.BoxGeometry(0.9,0.25,0.6),new THREE.MeshLambertMaterial({color:'#c48a4a'})); lm.position.set(0,0.125,0.3); lid.add(lm); const lock=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.15,0.08),new THREE.MeshLambertMaterial({color:'#ffd84d',emissive:'#ffb400',emissiveIntensity:0.3})); lock.position.set(0,0.1,0.62); lid.add(lock); chest.add(lid); chest.userData.lid=lid; const gem=new THREE.Mesh(new THREE.OctahedronGeometry(0.22,0),new THREE.MeshLambertMaterial({color:'#9ff5ff',emissive:'#4fd8ff',emissiveIntensity:0.6})); gem.position.y=0.55; gem.visible=false; chest.add(gem); chest.userData.gem=gem; } scene.add(chest); chest.visible=false;
 function placeChest(){ if(!CAVE.ok){ chest.visible=false; return; } chest.visible=true; chest.position.set(CAVE.cx,CAVE.cy-0.5,CAVE.cz); const open=done.has('schatz'); chest.userData.lid.rotation.x=open?-1.6:0; chest.userData.gem.visible=open; }
@@ -1084,7 +1093,7 @@ Object.entries(STAMPS).forEach(([id,def])=>{ const el=document.createElement('di
 function refreshPalette(){ document.querySelectorAll('.pal.furn').forEach(el=>{ const it=FURN_ITEM[+el.dataset.t]; const n=inv[it]||0; el.style.opacity=n>0?'1':'0.45'; el.setAttribute('data-n',n); }); const bedEl=document.querySelector('.pal[data-t="'+T.BETT+'"]'); if(bedEl) bedEl.style.display=(inv.bett>0)?'':'none'; document.querySelectorAll('.pal[data-t]').forEach(el=>{ const inf=B[+el.dataset.t]; if(inf.locked){ const ok=done.has('schatz'); el.textContent=ok?inf.e:'🔒'; el.style.opacity=ok?'1':'0.6'; } }); }
 // buttons
 document.getElementById('bSpell').onclick=openSpells; document.getElementById('bMap').onclick=openMap; document.getElementById('bBag').onclick=openBag; document.getElementById('bMenu').onclick=openMenu;
-document.getElementById('mode').onclick=toggleMode; document.getElementById('bUndo').onclick=undo;
+document.getElementById('mode').onclick=toggleMode; document.getElementById('bUndo').onclick=undo; document.getElementById('raceStop').onclick=()=>raceEnd(false);
 
 // ================= Save / load =================
 let uniName='Einhorn', uniColor='#ffffff', hornColor='#ffd84d', tutorial=0, uiScale='m', lefty=false; let visited=new Set(), knownPlaces=[];
