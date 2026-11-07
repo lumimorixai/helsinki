@@ -164,7 +164,7 @@
   <div class="card">
     <button class="xbtn hidden" id="startX" title="Schließen">✕</button>
     <h1>Einhorn-Blockwelt</h1>
-    <div style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 7.7</div>
+    <div style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 7.8</div>
     <p>Eine riesige Zauberwelt voller Dörfer, Ponys, Sterne und Geheimnisse. Lerne Zaubersprüche, baue, flieg – und finde den Schatz! 🌟</p>
     <input id="nameIn" maxlength="16" placeholder="Wie heißt dein Einhorn?" value="" autocomplete="off">
     <div class="lbl">Fellfarbe</div><div class="swatches" id="swatches"></div>
@@ -887,7 +887,8 @@ function buildUnicorn(color,horn){ while(uni.children.length) uni.remove(uni.chi
 const RACE={on:false,rings:[],idx:0,t0:0,best:0,countdown:0}; const ringGeo=new THREE.TorusGeometry(1.1,0.14,8,24);
 function clearRace(){ for(const r of RACE.rings) scene.remove(r.m); RACE.rings=[]; RACE.on=false; RACE.countdown=0; document.body.classList.remove('racing'); document.getElementById('race').classList.add('hidden'); }
 function startRace(){ clearRace(); const n=10; const cx=P.x, cz=P.z; const rad=14; const a0=Math.atan2(-Math.sin(camYaw),-Math.cos(camYaw));
-  for(let i=0;i<n;i++){ const a=a0+(i/n)*Math.PI*2; const rr=rad+Math.sin(i*1.7)*3; const gx=Math.round(cx+Math.sin(a)*rr), gz=Math.round(cz+Math.cos(a)*rr); const g=Math.max(height(gx,gz),SEA); const y=g+2.5+[0,1,3,5,2,0,4,6,3,1][i]; const m=new THREE.Mesh(ringGeo,new THREE.MeshLambertMaterial({color:RAINBOW[i%7],emissive:RAINBOW[i%7],emissiveIntensity:0.35,transparent:true,opacity:0.95})); m.position.set(gx,y,gz); m.rotation.y=a+Math.PI/2; m.castShadow=false; scene.add(m); RACE.rings.push({m,x:gx,y,z:gz,hit:false}); }
+  const clearAt=(x,y,z)=>{ for(let dx=-1;dx<=1;dx++) for(let dy=-1;dy<=1;dy++) for(let dz=-1;dz<=1;dz++) if(get(x+dx,y+dy,z+dz)) return false; return true; };
+  for(let i=0;i<n;i++){ const a=a0+(i/n)*Math.PI*2; const rr=rad+Math.sin(i*1.7)*3; const gx=Math.round(cx+Math.sin(a)*rr), gz=Math.round(cz+Math.cos(a)*rr); const g=Math.max(topY(gx,gz,60),SEA); let y=g+3+[0,1,3,5,2,0,4,6,3,1][i]; let guard=0; while(!clearAt(gx,y,gz)&&guard<30){ y++; guard++; } const m=new THREE.Mesh(ringGeo,new THREE.MeshLambertMaterial({color:RAINBOW[i%7],emissive:RAINBOW[i%7],emissiveIntensity:0.35,transparent:true,opacity:0.95})); m.position.set(gx,y,gz); m.rotation.y=a+Math.PI/2; m.castShadow=false; scene.add(m); RACE.rings.push({m,x:gx,y,z:gz,hit:false}); }
   RACE.on=true; RACE.idx=0; RACE.countdown=3.999; RACE.cdEnd=performance.now()+4000; RACE.lastCd=4; document.body.classList.add('racing'); document.getElementById('race').classList.remove('hidden'); if(!P.flying){ setFlying(true); P.vy=3; } sfx('mission'); }
 function raceEnd(finished){ const tt=Math.round((performance.now()-RACE.t0)/100)/10; clearRace(); if(!finished){ toast('🏁 Rennen beendet'); return; } const best=!RACE.best||tt<RACE.best; if(best) RACE.best=tt; save(); if(tt<60) mission('race'); setTimeout(()=>{ for(let i=0;i<4;i++) setTimeout(()=>spawn(P.x,P.y+2,P.z,RAINBOW,60,6,6,1.5),i*200); sfx('fanfare'); dialog('🏁 Ziel!',`<p style="text-align:center">Alle 10 Ringe in <b>${tt} Sekunden</b>!${best?'<br>🏆 Neue Bestzeit!':`<br>Bestzeit: ${RACE.best} s`}</p>`,[['Nochmal! 🏁',()=>setTimeout(startRace,100)],['Fertig',null]]); },200); }
 function updateRace(dt,time){ if(!RACE.on) return; const el=document.getElementById('raceTxt');
