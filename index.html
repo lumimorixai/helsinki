@@ -164,7 +164,7 @@
   <div class="card">
     <button class="xbtn hidden" id="startX" title="Schließen">✕</button>
     <h1>Einhorn-Blockwelt</h1>
-    <div style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 8.0</div>
+    <div style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 8.1</div>
     <p>Eine riesige Zauberwelt voller Dörfer, Ponys, Sterne und Geheimnisse. Lerne Zaubersprüche, baue, flieg – und finde den Schatz! 🌟</p>
     <input id="nameIn" maxlength="16" placeholder="Wie heißt dein Einhorn?" value="" autocomplete="off">
     <div class="lbl">Fellfarbe</div><div class="swatches" id="swatches"></div>
@@ -419,7 +419,7 @@ function fixedStructures(){ if(fixedBlocks) return fixedBlocks; const m=new Map(
   { const MX=MOUNT.x, MZ=MOUNT.z; const floor=rawHeight(MX,MZ-13)-1; const CAVE_={x:MX,z:MZ-13,h:floor,cx:MX,cy:floor,cz:MZ}; Object.assign(CAVE,CAVE_,{ok:true});
     for(let z=MZ-14;z<=MZ-3;z++) for(let dx=0;dx<=1;dx++){ for(let y=floor;y<=floor+2;y++) put(MX+dx,y,z,T.AIR); put(MX+dx,floor-1,z,T.STEIN); }
     for(let x=MX-3;x<=MX+4;x++) for(let z=MZ-3;z<=MZ+3;z++) for(let y=floor-1;y<=floor+4;y++){ const wall=x===MX-3||x===MX+4||z===MZ+3||y===floor-1||y===floor+4||(z===MZ-3&&!(x>=MX&&x<=MX+1&&y<=floor+2)); if(wall){ if(y===floor-1) put(x,y,z,(x===MX&&z===MZ)?T.GOLD:T.STEIN); else put(x,y,z,hash(x*3,z*5+y)>0.5?T.GLITZER:(hash(x,y*7+z)>0.88?T.LAMPE:T.STEIN)); } else put(x,y,z,T.AIR); }
-    for(const [dx,dz] of [[-2,2],[3,2],[-2,-2],[3,-2]]) put(MX+dx,floor+1,MZ+dz,T.DIAMANT); put(MX-1,floor,MZ-14,T.LAMPE); put(MX+2,floor,MZ-14,T.LAMPE); }
+    for(const [dx,dz] of [[-2,2],[3,2],[-2,-2],[3,-2]]) put(MX+dx,floor+1,MZ+dz,T.DIAMANT); for(const [dx,dz] of [[-3,0],[4,0],[0,3],[1,3],[-3,1],[4,-1]]) put(MX+dx,floor+2,MZ+dz,T.GOLD); for(const [dx,dz] of [[-1,-1],[2,1]]) put(MX+dx,floor,MZ+dz,T.GOLD); put(MX-1,floor,MZ-14,T.LAMPE); put(MX+2,floor,MZ-14,T.LAMPE); }
   fixedBlocks=m; return m; }
 const CAVE={ok:false,x:0,z:0,h:0,cx:0,cy:0,cz:0};
 // ================= Chunks =================
@@ -437,7 +437,10 @@ function ensureTerrain(cx,cz){ let c=getChunk(cx,cz); if(!c) c=newChunk(cx,cz); 
     for(let y=h+1;y<=SEA;y++) d[base+y]=T.WASSER;
     if(h>SEA+1 && h<=SEA+26 && !inVillage(x,z,2)){ const r=hash(x*3+1,z*7+2); const fl = b==='blumenwiese'?0.22 : b==='wiese'?0.07 : b==='zuckerwald'?0.05 : b==='kristall'?0.06 : 0.01;
       if(r<fl) d[base+h+1]=T.BLUME; else if(r<fl+(b==='schnee'?0.02:0.12)) d[base+h+1]=T.TUFT; else if(b==='zuckerwald'&&r<fl+0.16) d[base+h+1]=T.PILZ; }
-    if(b==='schnee'&&h>SEA+8&&hash(x+77,z+99)<0.012) d[base+h]=T.GOLD;
+    if(b==='schnee'&&h>SEA+8&&hash(x+77,z+99)<0.05) d[base+h]=T.GOLD;
+    // Golderz: Adern im Stein unter Bergen + kleine Nuggets an Hängen
+    if(h>SEA+12){ for(let y=Math.max(4,h-12);y<h-3;y++){ if(hash(x*13+y*7,z*11+y*3)<0.035) d[base+y]=T.GOLD; } }
+    if(h>SEA+6&&h<=SEA+26&&b!=='schnee'&&hash(x*17+5,z*19+9)<0.004&&!inVillage(x,z,3)) d[base+h+1]=T.GOLD;
     if(h>SEA+1&&h<=SEA+26&&(b==='wiese'||b==='blumenwiese'||b==='zuckerwald')&&hash(x*5+3,z*3+11)<0.006&&!inVillage(x,z,3)){ d[base+h+1]=T.WATTE; if(hash(x,z+5)>0.5) d[base+h+2]=T.WATTE; }
     // clouds
     const n=noise(x/14+200,z/9+300)*0.7+noise(x/5+400,z/5+100)*0.3; if(n>0.655){ const th=(n-0.655)*16; const top=44+Math.min(3,Math.floor(th)); const bot=44-(th>1.2?1:0)-(th>2.6?1:0); for(let y=bot;y<=top;y++){ const edge=(y===top&&th%1<0.35)||(y===bot&&bot<44&&hash(x+y,z)>0.6); if(!edge) d[base+y]=T.WOLKE; } }
@@ -718,7 +721,7 @@ function raycast(nd,maxDist,passThrough){ _dir.set(nd.x,nd.y,0.5).unproject(came
 // ================= Inventory / actions =================
 const inv={}; function addItem(id,n){ if(!id) return; inv[id]=(inv[id]||0)+(n||1); }
 const ITEM_NAMES={blume:'🌸 Blumen',watte:'🍬 Zuckerwatte',kristall:'🔮 Kristalle',holz:'🪵 Holz',gold:'⭐ Gold',schnee:'❄️ Schnee',pilz:'🍄 Pilze',stein:'🪨 Steine',gras:'🌱 Grasblöcke',erde:'🟫 Erde',sand:'🏖️ Sand',diamant:'💎 Diamanten',apfel:'🍎 Zuckeräpfel',schleim:'🧪 Schleim',bett:'🛏️ Betten',glitzer:'✨ Glitzerstaub',eis:'🧊 Eis',lilablatt:'🍇 Lila Blätter',bluetenblatt:'🌸 Blütenblätter',schild:'🛡️ Blütenschild',blitz:'⚡ Lichtblitz',schlaf:'💤 Schlaftrunk',decke_rosa:'🧶 Rosa Decke',decke_stern:'🌟 Sternendecke',decke_regen:'🌈 Regenbogendecke',ei:'🥚 Drachenei',tisch:'🪑 Tische',stuhl:'💺 Stühle',truhe:'🧰 Truhen',tuer:'🚪 Türen',zaun:'🪵 Zaunteile',topf:'🪴 Blumentöpfe',setzling:'🌱 Setzlinge'};
-const DROPS={1:[['gras',1,1],['apfel',0.04,1]],2:[['erde',1,1],['pilz',0.05,1]],3:[['stein',1,1],['kristall',0.06,1],['diamant',0.015,1]],13:[['sand',1,1],['gold',0.02,1]],6:[['watte',1,1],['apfel',0.12,1]],25:[['lilablatt',1,1],['kristall',0.08,1],['apfel',0.08,1]],30:[['apfel',0.12,1],['blume',0.05,1]],31:[['schnee',0.05,1]],32:[['holz',1,1]],26:[['bluetenblatt',1,1],['apfel',0.12,1]],17:[['schnee',1,1]],20:[['eis',1,1]],15:[['glitzer',1,2]],9:[['gold',1,1]],11:[['kristall',1,1]],21:[['diamant',1,1]],7:[['holz',1,1]],28:[['holz',1,1]],10:[['blume',1,1]],27:[['pilz',1,1]],29:[['bett',1,1]]};
+const DROPS={1:[['gras',1,1],['apfel',0.04,1]],2:[['erde',1,1],['pilz',0.05,1]],3:[['stein',1,1],['kristall',0.06,1],['gold',0.03,1],['diamant',0.015,1]],13:[['sand',1,1],['gold',0.02,1]],6:[['watte',1,1],['apfel',0.12,1]],25:[['lilablatt',1,1],['kristall',0.08,1],['apfel',0.08,1]],30:[['apfel',0.12,1],['blume',0.05,1]],31:[['schnee',0.05,1]],32:[['holz',1,1]],26:[['bluetenblatt',1,1],['apfel',0.12,1]],17:[['schnee',1,1]],20:[['eis',1,1]],15:[['glitzer',1,2]],9:[['gold',1,1]],11:[['kristall',1,1]],21:[['diamant',1,1]],7:[['holz',1,1]],28:[['holz',1,1]],10:[['blume',1,1]],27:[['pilz',1,1]],29:[['bett',1,1]]};
 const FURN_ITEM={33:'tisch',34:'stuhl',35:'truhe',36:'tuer',37:'tuer',38:'zaun',39:'topf',40:'setzling'};
 function dropFor(t){ if(FURN_ITEM[t]) return [[FURN_ITEM[t],1]]; const d=DROPS[t]; const out=[]; if(d){ for(const [it,p,n] of d) if(Math.random()<p) out.push([it,n]); } else if(B[t].item) out.push([B[t].item,1]); return out; }
 let curBlock=T.REGEN, removeMode=false, curStamp=null; const undoStack=[]; const stats={placed:0,magic:0,bounces:0,casts:0};
@@ -818,7 +821,7 @@ const QUESTS=[ // index by village.questIdx
   {item:'watte',n:8,reward:'bruecke',ask:'Ich backe eine Zuckerwatte-Torte! Bringst du mir 8 Zuckerwatte? Rosa Zuckerwatte-Wölkchen 🍬 schweben bei den rosa Bäumen – einfach hindurchlaufen oder antippen.'},
   {item:'kristall',n:6,reward:'frost',ask:'Meine Laterne braucht Kristalle. Bringst du mir 6 Kristalle? Die lila Kristallbäume und die Höhle haben welche.'},
   {item:'holz',n:10,reward:'wachsen',ask:'Wir bauen einen neuen Zaun. Bringst du mir 10 Holz? Baumstämme abbauen!'},
-  {item:'gold',n:3,reward:'teleport',ask:'Für den Brunnen brauche ich 3 Gold. Goldnuggets glitzern oben auf den Schneebergen – oder auf den Türmen des Schlosses.'},
+  {item:'gold',n:3,reward:'teleport',ask:'Für den Brunnen brauche ich 3 Gold. Goldnuggets glitzern auf den Schneebergen und an Hängen – grabe im Stein unter Bergen nach Goldadern, oder schau in der Höhle am Berg nach!'},
   {item:'schnee',n:6,reward:'sternenruf',ask:'Ich möchte einen Schneemann bauen! Bringst du mir 6 Schnee? Oben in den Bergen liegt genug.'}
 ];
 let questsDone=new Set();
