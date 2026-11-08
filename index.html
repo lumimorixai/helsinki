@@ -120,6 +120,7 @@
   @media (max-height:460px){ #joy{width:104px;height:104px;bottom:calc(var(--sab) + 84px);left:calc(var(--sal) + 12px)} #knob{width:46px;height:46px;margin:-23px} #look{width:104px;height:104px;bottom:calc(var(--sab) + 84px);right:calc(var(--sar) + 12px)} #lknob{width:42px;height:42px;margin:-21px;font-size:20px} #jump{width:62px;height:62px;font-size:26px;bottom:calc(var(--sab) + 84px);right:calc(var(--sar) + 126px)} #flyBtn{width:50px;height:50px;font-size:22px;bottom:calc(var(--sab) + 156px);right:calc(var(--sar) + 132px)} #down{width:50px;height:50px;font-size:22px;bottom:calc(var(--sab) + 196px);right:calc(var(--sar) + 39px)} body.lefty #look{right:auto;left:calc(var(--sal) + 12px)} body.lefty #jump{right:auto;left:calc(var(--sal) + 126px)} body.lefty #flyBtn{right:auto;left:calc(var(--sal) + 132px)} body.lefty #down{right:auto;left:calc(var(--sal) + 39px)} body.lefty #joy{left:auto;right:calc(var(--sar) + 12px)} .pal{width:40px;height:40px;font-size:19px;border-radius:11px} #palette{padding:4px;gap:6px;max-width:60vw} #bottom{flex-direction:row;align-items:flex-end;justify-content:center;gap:6px;bottom:calc(var(--sab) + 6px)} #mode{min-width:0;padding:10px 12px;font-size:15px;min-height:42px} #bUndo{width:42px;height:42px} .btn.round{width:40px;height:40px;font-size:18px} .badge{font-size:13px;padding:4px 10px} #compass{font-size:12px} #top{top:calc(var(--sat) + 6px)} #toast{bottom:calc(var(--sab) + 64px);font-size:14px} }
   @media (max-width:520px){ .btn.round{width:44px;height:44px;font-size:19px} #tools{gap:6px;max-width:60%} .badge{font-size:14px;padding:6px 10px} #compass{font-size:13px} }
   .nlabel{position:fixed;left:0;top:0;transform:translate(-50%,-100%);background:rgba(255,255,255,.85);border-radius:12px;padding:3px 9px;font-size:13px;font-weight:800;pointer-events:none;white-space:nowrap;display:none;box-shadow:0 2px 6px rgba(80,40,120,.2)}
+  .nlabel.village{font-size:15px;font-weight:800;background:rgba(255,255,255,.85);color:#7a4fa8;padding:4px 12px;border:2px solid #ffd1ec}
   .nlabel.q{background:linear-gradient(135deg,#fff3a0,#ffd1e8)}
   body.hurt canvas#c{filter:brightness(1.1) sepia(.4) hue-rotate(-40deg)}
   .tog{display:inline-flex;gap:8px;align-items:center;background:#f6f0ff;border-radius:14px;padding:8px 14px;cursor:pointer;font-weight:800;margin-top:8px}
@@ -173,7 +174,7 @@
   <div class="card">
     <button class="xbtn hidden" id="startX" title="Schließen">✕</button>
     <h1>Einhorn-Blockwelt</h1>
-    <div style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 9.1</div>
+    <div style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 9.2</div>
     <p>Eine riesige Zauberwelt voller Dörfer, Ponys, Sterne und Geheimnisse. Lerne Zaubersprüche, baue, flieg – und finde den Schatz! 🌟</p>
     <input id="nameIn" maxlength="16" placeholder="Wie heißt dein Einhorn?" value="" autocomplete="off">
     <div class="lbl">Fellfarbe</div><div class="swatches" id="swatches"></div>
@@ -296,7 +297,7 @@ function buildAtlas(){
   tile('kristall',(x,y,r)=>{ const v=(r()-0.5)*20; const f=((x+y)%7<2)?30:0; return [200+v+f,130+v+f,255,220]; });
   tile('diamant',(x,y,r)=>{ const v=(r()-0.5)*20; const sp=r()<0.08?50:0; return [160+v+sp,245,255,230]; });
   tile('plank',(x,y,r)=>{ const v=(r()-0.5)*14; const line=y%5===0; const nail=(y%5===2)&&(x===2||x===13); if(line) return [170+v,130+v,85+v]; if(nail) return [120,100,80]; const s=Math.sin(x*0.9+y)*6; return [220+v+s,180+v+s,130+v]; });
-  tile('roof',(x,y,r)=>{ const v=(r()-0.5)*14; const row=Math.floor(y/4); const off=(row%2)*4; const edge=y%4===0||((x+off)%8===0); return edge?[170+v,50+v,80+v]:[230+v,90+v,120+v]; });
+  tile('roof',(x,y,r)=>{ const v=(r()-0.5)*14; const row=Math.floor(y/4); const off=(row%2)*4; const edge=y%4===0||((x+off)%8===0); return edge?[175+v,175+v,175+v]:[240+v,240+v,240+v]; });
   tile('cobble',(x,y,r)=>{ const v=(r()-0.5)*18; const cx=((x%8)-4), cy=((y%8)-4); const o=(Math.floor(x/8)+Math.floor(y/8))%2?2:0; const d=Math.hypot(cx+o,cy); return d>3.4?[120+v,115+v,130+v]:[172+v,167+v,180+v]; });
   tile('water',(x,y,r)=>{ const v=(r()-0.5)*14; const w=Math.sin((x+y*0.5)*1.2)>0.7; return w?[150+v,210+v,255,200]:[90+v,170+v,255,180]; });
   tile('tuft',(x,y,r)=>{ const blades=[2,5,8,11,13]; for(const bx of blades){ const h=8+((bx*7)%6); if(Math.abs(x-bx-(15-y)*0.12*((bx%2)?1:-1))<0.8 && y>15-h) return [90+(r()-0.5)*20,170,80,255]; } return null; });
@@ -331,7 +332,22 @@ function noise(x,z){ const xi=Math.floor(x),zi=Math.floor(z),xf=x-xi,zf=z-zi; co
 const SEA=10, CHY=64;
 function temp(x,z){ return noise(x/190+500,z/190+500); }
 function moist(x,z){ return noise(x/150+900,z/150+100); }
-function biomeAt(x,z){ const t=temp(x,z), m=moist(x,z); if(t<0.3) return 'schnee'; if(m>0.64) return 'zuckerwald'; if(t>0.68&&m>0.4) return 'kristall'; if(m<0.36) return 'blumenwiese'; return 'wiese'; }
+// ================= Story-Dörfer (6 feste, unterschiedliche Dörfer) =================
+const STORY=[
+  {id:'0,0',cx:0,cz:0,name:'Sternendorf',e:'⭐',theme:'wiese',roof:'#e65a7a',biome:null,order:0,mayor:'Sternchen',mayorColor:'#ffd9f5',desc:'Dein Heimatdorf auf der grünen Wiese.'},
+  {id:'S1',cx:150,cz:-60,name:'Zuckerdorf',e:'🍭',theme:'zucker',roof:'#ff8fc8',biome:'zuckerwald',order:1,mayor:'Lotta',mayorColor:'#ffd1dc',desc:'Rosa Dächer, Zuckerwatte-Bäume und ein riesiger Lolli.'},
+  {id:'S2',cx:270,cz:70,name:'Kristallhafen',e:'⛵',theme:'hafen',roof:'#4f9fe6',biome:'kristall',order:2,mayor:'Finn',mayorColor:'#c7f0ff',desc:'Blaue Dächer am See, mit Steg, Booten und Leuchtturm.',lake:{dx:38,dz:4,r:20}},
+  {id:'S3',cx:120,cz:215,name:'Blütenhof',e:'🌻',theme:'bluete',roof:'#f2c230',biome:'blumenwiese',order:3,mayor:'Marie',mayorColor:'#fff3b0',desc:'Gelbe Dächer, Felder, Zäune und eine Windmühle.'},
+  {id:'S4',cx:-120,cz:175,name:'Schneekuppe',e:'❄️',theme:'schnee',roof:'#f4f8ff',biome:'schnee',order:4,mayor:'Nordi',mayorColor:'#e8f4ff',desc:'Hoch auf dem Schneeberg: Iglus und eine Eisrutsche.',mount:true},
+  {id:'S5',cx:-170,cz:-90,name:'Wolkenstadt',e:'☁️',theme:'wolke',roof:'#c9b6ff',biome:null,order:5,mayor:'Luna',mayorColor:'#d9c7ff',desc:'Eine Stadt auf einer Wolkeninsel – nur fliegend zu erreichen.',sky:true}
+];
+const STORY_BY_CELL={}; STORY.forEach(s=>{ STORY_BY_CELL[Math.floor(s.cx/128)+','+Math.floor(s.cz/128)]=s; });
+function storyNear(x,z,rad){ for(const s of STORY){ if(Math.abs(s.cx-x)<rad&&Math.abs(s.cz-z)<rad&&Math.hypot(s.cx-x,s.cz-z)<rad) return s; } return null; }
+// Wege zwischen den Dörfern (Sandpfade) – Wolkenstadt ist nur fliegend erreichbar
+const PATHS=[[0,1],[1,2],[2,3],[3,4],[0,3]].map(([a,b])=>({a:STORY[a],b:STORY[b]}));
+function pathDist(x,z){ let best=1e9; for(const p of PATHS){ const ax=p.a.cx,az=p.a.cz,bx=p.b.cx,bz=p.b.cz; const dx=bx-ax,dz=bz-az; const L2=dx*dx+dz*dz; let t=((x-ax)*dx+(z-az)*dz)/L2; if(t<0||t>1) continue; t=Math.max(0,Math.min(1,t)); const px=ax+dx*t, pz=az+dz*t; const wob=(noise(x/23+900,z/23+900)-0.5)*7; const d=Math.abs(Math.hypot(x-px,z-pz)+wob); if(d<best) best=d; } return best; }
+function onPath(x,z){ return pathDist(x,z)<1.6; }
+function biomeAt(x,z){ const s=storyNear(x,z,52); if(s&&s.biome) return s.biome; const t=temp(x,z), m=moist(x,z); if(t<0.3) return 'schnee'; if(m>0.64) return 'zuckerwald'; if(t>0.68&&m>0.4) return 'kristall'; if(m<0.36) return 'blumenwiese'; return 'wiese'; }
 const MOUNT={x:50,z:34}; const CASTLE={x:34,z:-30}; const HUPF={x:-34,z:22}; const RAINBOW_ARC={x:0,z:-46};
 function mound(x,z){ const d=Math.hypot(x-MOUNT.x,z-MOUNT.z); return d<14 ? Math.round(SEA+20-d*1.25+noise(x/3+7,z/3+7)*0.8) : 0; }
 function rawHeight(x,z){
@@ -349,24 +365,33 @@ const VNAMES=['Sternendorf','Zuckerhausen','Wolkenweiler','Kristallbach','Himbee
 const PONY_NAMES=['Lilli','Mo','Fritzi','Nele','Bo','Pippa','Luna','Kiki','Juna','Ella','Fee','Mila','Tami','Rosi','Lou','Finja','Nova','Pia','Momo','Zoe'];
 function village(vx,vz){ const k=vx+','+vz; if(vcache.has(k)) return vcache.get(k);
   let v=null; const r=hash(vx*13+5,vz*17+9);
-  if((vx===0&&vz===0)||r<0.8){ let cx,cz; if(vx===0&&vz===0){ cx=0; cz=0; } else { cx=vx*VCELL+32+Math.floor(hash(vx,vz)*64); cz=vz*VCELL+32+Math.floor(hash(vz+3,vx+1)*64); }
-    const idx=Math.abs(vx*7+vz*13)%VNAMES.length; const h=Math.max(SEA+2,rawHeight(cx,cz)); const nH=5+Math.floor(hash(vx+9,vz+9)*3);
-    v={id:k,vx,vz,cx,cz,h,r:20,name:(vx===0&&vz===0)?'Sternendorf':VNAMES[idx]+(idx===0?' II':''),houses:[],npcs:[],questIdx:(vx===0&&vz===0)?0:(1+Math.abs(vx*3+vz*5)%5)};
+  const story=STORY_BY_CELL[k]||null; const isStory=!!story;
+  if(isStory||r<0.8){ let cx,cz; if(isStory){ cx=story.cx; cz=story.cz; } else { cx=vx*VCELL+32+Math.floor(hash(vx,vz)*64); cz=vz*VCELL+32+Math.floor(hash(vz+3,vx+1)*64); }
+    if(!isStory&&Math.hypot(cx,cz)<360){ vcache.set(k,null); return null; }
+    const idx=Math.abs(vx*7+vz*13)%VNAMES.length; let h=Math.max(SEA+2,rawHeight(cx,cz)); const nH=isStory?6:5+Math.floor(hash(vx+9,vz+9)*3);
+    if(story&&story.mount) h=SEA+22; if(story&&story.sky) h=SEA+28; if(story&&story.theme==='hafen') h=Math.max(h,SEA+3);
+    v={id:isStory?story.id:k,vx,vz,cx,cz,h,r:isStory?24:20,name:isStory?story.name:VNAMES[idx]+(idx===0?' II':''),houses:[],npcs:[],questIdx:isStory?story.order:(1+Math.abs(vx*3+vz*5)%5),story,theme:story?story.theme:'wiese',roof:story?story.roof:'#e65a7a'};
     for(let i=0;i<nH;i++){ const a=i/nH*Math.PI*2+hash(vx+i,vz)*0.3; const rad=12+hash(vz+i,vx)*4; v.houses.push({x:Math.round(cx+Math.cos(a)*rad),z:Math.round(cz+Math.sin(a)*rad),w:5+Math.floor(hash(i,vx+vz)*2)*2,d:5+Math.floor(hash(i+5,vx)*2)*2,a}); }
     const nN=3+Math.floor(hash(vx+2,vz+4)*3); const used=new Set();
     for(let i=0;i<nN;i++){ let ni=Math.floor(hash(vx*3+i,vz*5+i)*PONY_NAMES.length); while(used.has(ni)) ni=(ni+1)%PONY_NAMES.length; used.add(ni); const a=hash(i,vx+vz+i)*Math.PI*2; v.npcs.push({house:v.houses[i%v.houses.length],name:PONY_NAMES[ni],color:['#fff0f5','#ffe0b3','#d9c7ff','#c7f0ff','#ffd1dc','#e6ffe0'][i%6],x:cx+Math.cos(a)*(4+i),z:cz+Math.sin(a)*(4+i),mayor:i===0}); }
-    if(vx===0&&vz===0){ v.npcs[0].name='Sternchen'; v.npcs[0].color='#ffd9f5'; }
+    if(story){ v.npcs[0].name=story.mayor; v.npcs[0].color=story.mayorColor; }
   }
   vcache.set(k,v); return v; }
 function villagesNear(x,z,extra){ const out=[]; const vx=Math.floor(x/VCELL), vz=Math.floor(z/VCELL); for(let dx=-1;dx<=1;dx++) for(let dz=-1;dz<=1;dz++){ const v=village(vx+dx,vz+dz); if(v && Math.hypot(v.cx-x,v.cz-z)<v.r+(extra||0)+12) out.push(v); } return out; }
-function height(x,z){ let h=rawHeight(x,z); for(const v of villagesNear(x,z,10)){ const d=Math.hypot(v.cx-x,v.cz-z); if(d<v.r) h=v.h; else if(d<v.r+10){ const k=(d-v.r)/10; h=Math.round(v.h*(1-k)+h*k); } } return h; }
+function height(x,z){ let h=rawHeight(x,z); for(const v of villagesNear(x,z,40)){ const d=Math.hypot(v.cx-x,v.cz-z); const s=v.story;
+    if(s&&s.sky){ continue; }
+    if(s&&s.mount){ if(d<v.r) h=v.h; else if(d<v.r+40){ const k=(d-v.r)/40; const kk=k*k*(3-2*k); h=Math.round(v.h*(1-kk)+Math.min(h,v.h-4)*kk); } continue; }
+    if(d<v.r) h=v.h; else if(d<v.r+10){ const k=(d-v.r)/10; h=Math.round(v.h*(1-k)+h*k); }
+    if(s&&s.lake&&d>=v.r){ const lx=v.cx+s.lake.dx, lz=v.cz+s.lake.dz; const dl=Math.hypot(lx-x,lz-z); if(dl<s.lake.r){ const lh=SEA-3; if(dl<s.lake.r-6) h=lh; else { const k=(dl-(s.lake.r-6))/6; h=Math.round(lh*(1-k)+h*k); } } }
+  } return h; }
 function inVillage(x,z,m){ for(const v of villagesNear(x,z,m||0)) if(Math.hypot(v.cx-x,v.cz-z)<v.r+(m||0)) return v; return null; }
 
 // ================= Structures (stamped per chunk) =================
 const skey=(x,y,z)=>((x+4096)*8192+(z+4096))*64+y; // numeric key, no bit ops
 const sunkey=k=>{ const y=k%64; const r=(k-y)/64; const z=r%8192-4096; const x=(r-(r%8192))/8192-4096; return {x,y,z}; };
-function treeAt(x,z){ if(x*x+z*z<120) return null; const h=height(x,z); if(h<=SEA+1) return null; if(inVillage(x,z,4)) return null; const b=biomeAt(x,z); const r=hash(x+500,z+500);
-  const p = b==='zuckerwald'?0.07 : b==='wiese'?0.03 : b==='kristall'?0.035 : b==='blumenwiese'?0.016 : 0.02;
+function treeAt(x,z){ if(x*x+z*z<120) return null; const h=height(x,z); if(h<=SEA+1) return null; if(inVillage(x,z,12)) return null; if(pathDist(x,z)<4) return null; const b=biomeAt(x,z); const r=hash(x+500,z+500);
+  const grove=noise(x/19+1200,z/19+1200); const gm=grove>0.58?2.4:(grove>0.47?0.9:0.18);
+  const p = (b==='zuckerwald'?0.04 : b==='wiese'?0.016 : b==='kristall'?0.02 : b==='blumenwiese'?0.01 : 0.018)*gm;
   if(r>p) return null; const k=hash(x+9,z+9), k2=hash(x*3+1,z*5+2);
   let kind='oak', leaf=T.LAUB, trunkT=T.HOLZ;
   if(b==='schnee'){ kind='fir'; leaf=T.NADEL; }
@@ -387,7 +412,9 @@ function treeBlocks(tr,out){ const {x,z,h,leaf,kind,trunk}=tr; const trunkT=tr.t
   const cy=h+trunk+ (kind==='round'?1:0); const set=new Set();
   for(const [ox,oy,oz,rx,ry] of blobs){ for(let dx=-3;dx<=3;dx++) for(let dy=-2;dy<=3;dy++) for(let dz=-3;dz<=3;dz++){ const nx=(dx-ox)/rx, ny=(dy-oy)/ry, nz=(dz-oz)/rx; const d=nx*nx+ny*ny+nz*nz; if(d>1) continue; if(d>0.72 && rnd(dx*7+dy*13+dz*29)<0.35) continue; if(dx===0&&dz===0&&dy<=0) continue; const key=dx+','+dy+','+dz; if(set.has(key)) continue; set.add(key); out.push([x+dx,cy+dy,z+dz,leaf]); } } }
 const vblocks=new Map();
-function villageBlocks(v){ if(vblocks.has(v.id)) return vblocks.get(v.id); const m=new Map(); const put=(x,y,z,t)=>m.set(skey(x,y,z),t); const H=v.h;
+function villageBlocks(v){ if(vblocks.has(v.id)) return vblocks.get(v.id); const m=new Map(); const put=(x,y,z,t)=>m.set(skey(x,y,z),t); const H=v.h; const th=v.theme||'wiese';
+  // Wolkeninsel
+  if(th==='wolke'){ const R=v.r+2; for(let dx=-R;dx<=R;dx++) for(let dz=-R;dz<=R;dz++){ const d=Math.hypot(dx,dz); if(d>R) continue; const depth=d<R-6?3:(d<R-2?2:1); put(v.cx+dx,H,v.cz+dz,T.GRAS); for(let y=1;y<=depth;y++) put(v.cx+dx,H-y,v.cz+dz,T.WOLKE); if(d>R-3&&hash(dx+3,dz+7)<0.5) put(v.cx+dx,H-depth-1,v.cz+dz,T.WOLKE); } }
   // well
   for(let dx=-1;dx<=1;dx++) for(let dz=-1;dz<=1;dz++){ put(v.cx+dx,H,v.cz+dz,T.PFLASTER); if(dx||dz) put(v.cx+dx,H+1,v.cz+dz,T.PFLASTER); else put(v.cx,H+1,v.cz,T.WASSER); }
   for(const [dx,dz] of [[-1,-1],[1,1]]){ put(v.cx+dx,H+2,v.cz+dz,T.HOLZ); put(v.cx+dx,H+3,v.cz+dz,T.HOLZ); }
@@ -398,7 +425,7 @@ function villageBlocks(v){ if(vblocks.has(v.id)) return vblocks.get(v.id); const
   // lamps
   for(const [dx,dz] of [[5,5],[-5,5],[5,-5],[-5,-5]]){ put(v.cx+dx,H+1,v.cz+dz,T.HOLZ); put(v.cx+dx,H+2,v.cz+dz,T.HOLZ); put(v.cx+dx,H+3,v.cz+dz,T.LAMPE); }
   v.houses.forEach((hs,hi)=>{ const w2=(hs.w-1)/2, d2=(hs.d-1)/2; const wallH=3; const faceX=Math.abs(Math.cos(hs.a))>Math.abs(Math.sin(hs.a)); const doorSide = faceX ? (Math.cos(hs.a)>0?'-x':'+x') : (Math.sin(hs.a)>0?'-z':'+z');
-    for(let dx=-w2;dx<=w2;dx++) for(let dz=-d2;dz<=d2;dz++){ const x=hs.x+dx, z=hs.z+dz; put(x,H,z,T.BRETT); for(let y=H-1;y>=H-4;y--) put(x,y,z,T.ERDE);
+    for(let dx=-w2;dx<=w2;dx++) for(let dz=-d2;dz<=d2;dz++){ const x=hs.x+dx, z=hs.z+dz; put(x,H,z,T.BRETT); for(let y=H-1;y>=H-4;y--) put(x,y,z,th==='wolke'?T.WOLKE:T.ERDE);
       const edge=Math.abs(dx)===w2||Math.abs(dz)===d2; const corner=Math.abs(dx)===w2&&Math.abs(dz)===d2;
       for(let y=1;y<=wallH;y++){ let t=edge?(corner?T.HOLZ:T.BRETT):T.AIR;
         if(edge&&!corner&&y===2&&((Math.abs(dx)===w2&&dz===0)||(Math.abs(dz)===d2&&dx===0))) t=T.GLAS;
@@ -414,7 +441,47 @@ function villageBlocks(v){ if(vblocks.has(v.id)) return vblocks.get(v.id); const
     // flower box
     put(hs.x+w2+1,H+1,hs.z+d2+1,T.BLUME); put(hs.x-w2-1,H+1,hs.z-d2-1,T.BLUME);
   });
+  landmark(v,put,H,th);
   vblocks.set(v.id,m); return m; }
+// Wahrzeichen je Dorf-Thema
+function landmark(v,put,H,th){ const cx=v.cx, cz=v.cz; const col=(x,z,y0,y1,t)=>{ for(let y=y0;y<=y1;y++) put(x,y,z,t); }; const disc=(x,y,z,r,t,plane)=>{ for(let a=-r;a<=r;a++) for(let b=-r;b<=r;b++){ if(a*a+b*b>r*r+r*0.6) continue; if(plane==='xz') put(x+a,y,z+b,t); else if(plane==='xy') put(x+a,y+b,z,t); else put(x,y+b,z+a,t); } };
+  // Wegweiser-Platz: Sitzbank + Laterne am Dorfeingang (Richtung Weg)
+  if(th==='wiese'){ /* Sternendorf: Blumenring um den Brunnen */ for(let a=0;a<Math.PI*2;a+=0.5){ const x=Math.round(cx+Math.cos(a)*8), z=Math.round(cz+Math.sin(a)*8); put(x,H+1,z,T.BLUME); } }
+  if(th==='zucker'){ // Riesen-Lolli
+    const lx=cx-21, lz=cz; col(lx,lz,H+1,H+7,T.BRETT); for(let r=0;r<=4;r++){ const t=[T.REGEN,T.WATTE,T.LILA,T.WATTE,T.REGEN][r]; for(let a=-4;a<=4;a++) for(let b=-4;b<=4;b++){ const d=Math.round(Math.hypot(a,b)); if(d===r) put(lx+a,H+10+b,lz,t); } }
+    // Zuckerstangen-Zaun um den Platz
+    for(let a=0;a<Math.PI*2;a+=0.35){ const x=Math.round(cx+Math.cos(a)*7), z=Math.round(cz+Math.sin(a)*7); put(x,H+1,z,(Math.round(a*10)%2)?T.REGEN:T.WATTE); }
+    for(const [dx,dz] of [[21,0],[0,21],[0,-21],[-15,15],[15,15],[15,-15],[-15,-15]]){ put(cx+dx,H+1,cz+dz,T.WATTE); put(cx+dx,H+2,cz+dz,T.WATTE); put(cx+dx,H+3,cz+dz,T.LILA); }
+  }
+  if(th==='hafen'&&v.story&&v.story.lake){ const L=v.story.lake; const dirx=Math.sign(L.dx)||1; // Steg Richtung See
+    const sx=cx+dirx*(v.r-4), sz=cz+Math.round(L.dz*0.5); for(let i=0;i<18;i++){ const x=sx+dirx*i; for(let dz=-1;dz<=1;dz++){ put(x,SEA+1,sz+dz,T.BRETT); for(let y=H+1;y>SEA+1;y--) put(x,y,sz+dz,T.AIR); } if(i%4===0){ put(x,SEA+2,sz-2,T.ZAUN); put(x,SEA+2,sz+2,T.ZAUN); put(x,SEA+1,sz-2,T.HOLZ); put(x,SEA+1,sz+2,T.HOLZ); } }
+    // Rampe vom Dorf zum Steg
+    for(let i=0;i<4;i++){ for(let dz=-1;dz<=1;dz++) put(sx-dirx*i-dirx, Math.max(SEA+1,H-i), sz+dz, T.BRETT); }
+    // Leuchtturm am Stegende
+    const tx=sx+dirx*19, tz=sz; for(let y=SEA+1;y<=SEA+11;y++){ const stripe=Math.floor((y-SEA-1)/2)%2===0; for(let dx=-1;dx<=1;dx++) for(let dz=-1;dz<=1;dz++){ const edge=Math.abs(dx)===1||Math.abs(dz)===1; put(tx+dx,y,tz+dz,edge?(stripe?T.SCHNEE:T.DACH):T.AIR); } } for(let dx=-1;dx<=1;dx++) for(let dz=-1;dz<=1;dz++) put(tx+dx,SEA+12,tz+dz,(dx||dz)?T.GLAS:T.LAMPE); for(let dx=-2;dx<=2;dx++) for(let dz=-2;dz<=2;dz++) if(Math.abs(dx)+Math.abs(dz)<=3) put(tx+dx,SEA+13,tz+dz,T.DACH); put(tx,SEA+14,tz,T.GOLD);
+    // zwei Boote
+    for(const [bx,bz,ax] of [[sx+dirx*8,sz+6,1],[sx+dirx*12,sz-7,0]]){ for(let i=-2;i<=2;i++){ for(let j=-1;j<=1;j++){ const x=ax?bx+i:bx+j, z=ax?bz+j:bz+i; put(x,SEA,z,T.BRETT); if(Math.abs(i)===2||Math.abs(j)===1) put(x,SEA+1,z,T.HOLZ); } } put(bx,SEA+1,bz,T.BRETT); col(bx,bz,SEA+2,SEA+4,T.HOLZ); put(bx,SEA+5,bz,T.WATTE); put(bx+(ax?0:1),SEA+4,bz+(ax?1:0),T.WATTE); }
+  }
+  if(th==='bluete'){ // Windmühle
+    const mx=cx+21, mz=cz; for(let y=H+1;y<=H+8;y++) for(let dx=-1;dx<=1;dx++) for(let dz=-1;dz<=1;dz++){ const edge=Math.abs(dx)===1||Math.abs(dz)===1; put(mx+dx,y,mz+dz,edge?(y===H+3&&dx===-1&&dz===0?T.TUER:T.BRETT):T.AIR); } for(let dx=-2;dx<=2;dx++) for(let dz=-2;dz<=2;dz++) if(Math.abs(dx)+Math.abs(dz)<=3) put(mx+dx,H+9,mz+dz,T.DACH); put(mx,H+10,mz,T.DACH);
+    const hub=H+7; put(mx-2,hub,mz,T.HOLZ); for(let i=1;i<=4;i++){ put(mx-2,hub+i,mz,T.HOLZ); put(mx-2,hub-i,mz,T.HOLZ); put(mx-2,hub,mz+i,T.HOLZ); put(mx-2,hub,mz-i,T.HOLZ); if(i>=2){ put(mx-2,hub+i,mz+1,T.BRETT); put(mx-2,hub-i,mz-1,T.BRETT); put(mx-2,hub+1,mz+i,T.BRETT); put(mx-2,hub-1,mz-i,T.BRETT); } }
+    // zwei Felder mit Zaun
+    for(const [fx,fz] of [[cx-20,cz+8],[cx-20,cz-14]]){ for(let dx=0;dx<9;dx++) for(let dz=0;dz<7;dz++){ const x=fx+dx, z=fz+dz; const edge=dx===0||dz===0||dx===8||dz===6; if(edge){ put(x,H+1,z,T.ZAUN); } else { put(x,H,z,dz%2?T.ERDE:T.GRAS); put(x,H+1,z,dz%2?T.TUFT:T.BLUME); } } put(fx+4,H+1,fz,T.AIR); }
+    for(const [dx,dz] of [[8,8],[-8,8],[8,-8],[-8,-8]]) put(cx+dx,H+1,cz+dz,T.TOPF);
+  }
+  if(th==='schnee'){ // zwei Iglus
+    for(const [ix,iz,r] of [[cx+19,cz-10,3],[cx-10,cz+20,3]]){ for(let dx=-r;dx<=r;dx++) for(let dy=0;dy<=r;dy++) for(let dz=-r;dz<=r;dz++){ const d=Math.sqrt(dx*dx+dy*dy*1.1+dz*dz); if(d>r+0.4||d<r-0.7) continue; if(dy<=1&&dz===0&&dx<=-r+1&&dx>=-r-1) continue; put(ix+dx,H+1+dy,iz+dz,T.SCHNEE); } put(ix-r-1,H+1,iz,T.SCHNEE); put(ix-r-1,H+2,iz,T.SCHNEE); put(ix-r-1,H+1,iz-1,T.SCHNEE); put(ix-r-1,H+1,iz+1,T.SCHNEE); put(ix-r-1,H+2,iz-1,T.SCHNEE); put(ix-r-1,H+2,iz+1,T.SCHNEE); put(ix,H+1,iz,T.BETT); }
+    // Eisrutsche den Berg hinunter (Richtung Weg nach Blütenhof = +x)
+    for(let i=0;i<46;i++){ const x=cx+v.r-2+i; const y=H-Math.floor(i*0.42); for(let dz=-1;dz<=1;dz++){ put(x,y,cz+dz,T.EIS); for(let yy=y+1;yy<=y+3;yy++) put(x,yy,cz+dz,T.AIR); } put(x,y+1,cz-2,T.SCHNEE); put(x,y+1,cz+2,T.SCHNEE); }
+    for(const [dx,dz] of [[6,6],[-6,6],[6,-6],[-6,-6]]){ col(cx+dx,cz+dz,H+1,H+2,T.EIS); put(cx+dx,H+3,cz+dz,T.KRISTALL); }
+  }
+  if(th==='wolke'){ // Glockenturm
+    const tx=cx+20, tz=cz; for(let y=H+1;y<=H+11;y++) for(let dx=-1;dx<=1;dx++) for(let dz=-1;dz<=1;dz++){ const edge=Math.abs(dx)===1||Math.abs(dz)===1; let t=edge?(y>=H+9?T.AIR:T.BRETT):T.AIR; if(edge&&y>=H+9&&Math.abs(dx)===1&&Math.abs(dz)===1) t=T.HOLZ; put(tx+dx,y,tz+dz,t); } put(tx,H+10,tz,T.GOLD); for(let dx=-2;dx<=2;dx++) for(let dz=-2;dz<=2;dz++) if(Math.abs(dx)+Math.abs(dz)<=3) put(tx+dx,H+12,tz+dz,T.DACH); put(tx,H+13,tz,T.DACH); put(tx,H+14,tz,T.KRISTALL);
+    // Regenbogen-Landeplatz
+    for(let dx=-3;dx<=3;dx++) for(let dz=-3;dz<=3;dz++) if(Math.abs(dx)+Math.abs(dz)<=4) put(cx-20+dx,H,cz+dz,T.REGEN);
+    for(const [dx,dz] of [[7,7],[-7,7],[7,-7],[-7,-7]]){ col(cx+dx,cz+dz,H+1,H+2,T.GLAS); put(cx+dx,H+3,cz+dz,T.KRISTALL); }
+  }
+}
 let fixedBlocks=null;
 function fixedStructures(){ if(fixedBlocks) return fixedBlocks; const m=new Map(); const put=(x,y,z,t)=>m.set(skey(x,y,z),t);
   // Castle
@@ -443,9 +510,11 @@ function newChunk(cx,cz){ const c={cx,cz,data:new Uint8Array(CH*CH*CHY),gen:fals
 function getChunk(cx,cz){ return chunks.get(ckey(cx,cz)); }
 function ensureTerrain(cx,cz){ let c=getChunk(cx,cz); if(!c) c=newChunk(cx,cz); if(c.gen) return c; const d=c.data; const x0=cx*CH, z0=cz*CH;
   for(let lx=0;lx<CH;lx++) for(let lz=0;lz<CH;lz++){ const x=x0+lx, z=z0+lz; const h=height(x,z); const b=biomeAt(x,z); const base=lidx(lx,0,lz);
-    for(let y=0;y<=h;y++){ let t; if(y===h){ t = h<=SEA+1 ? T.SAND : (b==='schnee'&&h>SEA+6 ? T.SCHNEE : T.GRAS); if(h>SEA+26) t=T.SCHNEE; } else if(y>=h-3) t = h<=SEA+1?T.SAND:T.ERDE; else t=T.STEIN; d[base+y]=t; }
+    const path=onPath(x,z);
+    for(let y=0;y<=h;y++){ let t; if(y===h){ t = h<=SEA+1 ? T.SAND : (b==='schnee'&&h>SEA+6 ? T.SCHNEE : T.GRAS); if(h>SEA+26) t=T.SCHNEE; if(path&&h>SEA) t=T.SAND; } else if(y>=h-3) t = h<=SEA+1?T.SAND:T.ERDE; else t=T.STEIN; d[base+y]=t; }
     for(let y=h+1;y<=SEA;y++) d[base+y]=T.WASSER;
-    if(h>SEA+1 && h<=SEA+26 && !inVillage(x,z,2)){ const r=hash(x*3+1,z*7+2); const fl = b==='blumenwiese'?0.22 : b==='wiese'?0.07 : b==='zuckerwald'?0.05 : b==='kristall'?0.06 : 0.01;
+    if(path&&h<=SEA){ d[base+SEA+1]=T.BRETT; }
+    if(h>SEA+1 && h<=SEA+26 && !path && !inVillage(x,z,2)){ const r=hash(x*3+1,z*7+2); const fl = b==='blumenwiese'?0.22 : b==='wiese'?0.07 : b==='zuckerwald'?0.05 : b==='kristall'?0.06 : 0.01;
       if(r<fl) d[base+h+1]=T.BLUME; else if(r<fl+(b==='schnee'?0.02:0.12)) d[base+h+1]=T.TUFT; else if(b==='zuckerwald'&&r<fl+0.16) d[base+h+1]=T.PILZ; }
     if(b==='schnee'&&h>SEA+8&&hash(x+77,z+99)<0.05) d[base+h]=T.GOLD;
     // Golderz: Adern im Stein unter Bergen + kleine Nuggets an Hängen
@@ -493,7 +562,7 @@ matWater.onBeforeCompile=sh=>{ sh.uniforms.uT=fxTime; sh.vertexShader=sh.vertexS
   { vec3 wp=(modelMatrix*vec4(position,1.0)).xyz; float up=step(0.9,normal.y); transformed.y+=up*(sin(uT*1.4+wp.x*0.8+wp.z*0.5)*0.05+sin(uT*2.3-wp.z*1.1+wp.x*0.3)*0.03); }`).replace('#include <uv_vertex>',`#include <uv_vertex>
   vUv+=vec2(sin(uT*0.5)*0.0015,cos(uT*0.4)*0.0015);`); };
 const _tc=new THREE.Color();
-function blockTint(t,x,y,z,out){ const inf=B[t]; if(inf.rainbow){ out.set(RAINBOW[((x+y+z*2)%7+7)%7]); return out; } out.setRGB(1,1,1); if(t===T.LAMPE){ out.setRGB(2.2,2.0,1.6); return out; } if(t===T.WOLKE){ out.setRGB(1.75,1.75,1.8); return out; } if(t===T.HERZKRISTALL_AN){ out.setRGB(1.8,1.5,1.7); return out; } if(t===T.GOLD||t===T.GLITZER||t===T.DIAMANT){ out.setRGB(1.25,1.25,1.2); return out; } const v=(hash(x*7+y*3,z*5+y)-0.5); if(t===T.GRAS||t===T.WATTE||t===T.LILA||t===T.BLUETE||t===T.TUFT||t===T.LAUB||t===T.NADEL){ const s=1+v*(t===T.LAUB||t===T.NADEL?0.22:0.12); out.setRGB(s,s*(1+v*0.06),s); } return out; }
+function blockTint(t,x,y,z,out){ if(t===T.DACH){ const v=inVillage(x,z,6); out.set(v?v.roof:'#e65a7a'); out.multiplyScalar(1.05); return out; } const inf=B[t]; if(inf.rainbow){ out.set(RAINBOW[((x+y+z*2)%7+7)%7]); return out; } out.setRGB(1,1,1); if(t===T.LAMPE){ out.setRGB(2.2,2.0,1.6); return out; } if(t===T.WOLKE){ out.setRGB(1.75,1.75,1.8); return out; } if(t===T.HERZKRISTALL_AN){ out.setRGB(1.8,1.5,1.7); return out; } if(t===T.GOLD||t===T.GLITZER||t===T.DIAMANT){ out.setRGB(1.25,1.25,1.2); return out; } const v=(hash(x*7+y*3,z*5+y)-0.5); if(t===T.GRAS||t===T.WATTE||t===T.LILA||t===T.BLUETE||t===T.TUFT||t===T.LAUB||t===T.NADEL){ const s=1+v*(t===T.LAUB||t===T.NADEL?0.22:0.12); out.setRGB(s,s*(1+v*0.06),s); } return out; }
 function meshChunk(c){
   for(const m of c.meshes){ scene.remove(m); m.geometry.dispose(); } c.meshes=[];
   const d=c.data, x0=c.cx*CH, z0=c.cz*CH;
@@ -801,9 +870,9 @@ function doAction(nd,forceRemove){ if(!playing()) return; if(RACE.on) return; if
     refreshPalette(); if(after!=null) selectBlock(after); }
   saveSoon(); }
 let gameMode='explore';
-function setMode(m,quiet){ if(!['explore','build','remove'].includes(m)) return; gameMode=m; removeMode=(m==='remove'); document.body.classList.remove('mode-explore','mode-build','mode-remove'); document.body.classList.add('mode-'+m); document.querySelectorAll('#modeSeg button').forEach(b=>b.classList.toggle('sel',b.dataset.m===m)); hl.material.color.set(m==='remove'?0xff7070:0xffffff); if(m!=='build'){ curStamp=null; if(curBlock==null) curBlock=T.REGEN; } if(!quiet){ if(m==='build'&&!stats.hintBuild){ stats.hintBuild=1; toast('🧱 Bauen: Block unten wählen, dann auf den Boden tippen'); } if(m==='remove'&&!stats.hintRemove){ stats.hintRemove=1; toast('⛏️ Abbauen: Block antippen – landet im Rucksack'); } } }
+function setMode(m,quiet){ if(!['explore','build','remove'].includes(m)) return; gameMode=m; removeMode=(m==='remove'); document.body.classList.remove('mode-explore','mode-build','mode-remove'); document.body.classList.add('mode-'+m); document.querySelectorAll('#modeSeg button').forEach(b=>b.classList.toggle('sel',b.dataset.m===m)); try{ hl.material.color.set(m==='remove'?0xff7070:0xffffff); }catch(_){ } if(m!=='build'){ curStamp=null; if(curBlock==null) curBlock=T.REGEN; } if(!quiet){ if(m==='build'&&!stats.hintBuild){ stats.hintBuild=1; toast('🧱 Bauen: Block unten wählen, dann auf den Boden tippen'); } if(m==='remove'&&!stats.hintRemove){ stats.hintRemove=1; toast('⛏️ Abbauen: Block antippen – landet im Rucksack'); } } }
 function toggleMode(){ setMode(gameMode==='remove'?'build':'remove'); }
-document.querySelectorAll('#modeSeg button').forEach(b=>b.addEventListener('click',()=>{ setMode(b.dataset.m); sfx&&sfx('click'); })); setMode('explore',true);
+document.querySelectorAll('#modeSeg button').forEach(b=>b.addEventListener('click',()=>{ setMode(b.dataset.m); sfx&&sfx('click'); }));
 function selectStamp(id){ curStamp=id; curBlock=null; document.querySelectorAll('.pal').forEach(el=>el.classList.toggle('sel',el.dataset.s===id)); if(gameMode!=='build') setMode('build',true); toast(STAMPS[id].e+' '+STAMPS[id].n+' – tippe auf den Boden!'); }
 function selectBlock(t){ curBlock=t; curStamp=null; document.querySelectorAll('.pal').forEach(el=>el.classList.toggle('sel',+el.dataset.t===t)); if(gameMode!=='build') setMode('build',true); toast(B[t].e+' '+B[t].n); const el=document.querySelector('.pal.sel'); if(el&&el.scrollIntoView) try{ el.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'}); }catch(e){} }
 const hl=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1.02,1.02,1.02)),new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:0.9})); hl.visible=false; scene.add(hl);
@@ -1218,7 +1287,7 @@ Object.entries(STAMPS).forEach(([id,def])=>{ const el=document.createElement('di
 function refreshPalette(){ document.querySelectorAll('.pal.furn').forEach(el=>{ const it=FURN_ITEM[+el.dataset.t]; const n=inv[it]||0; el.style.opacity=n>0?'1':'0.45'; el.setAttribute('data-n',n); }); const bedEl=document.querySelector('.pal[data-t="'+T.BETT+'"]'); if(bedEl) bedEl.style.display=(inv.bett>0)?'':'none'; document.querySelectorAll('.pal[data-t]').forEach(el=>{ const inf=B[+el.dataset.t]; if(inf.locked){ const ok=done.has('schatz'); el.textContent=ok?inf.e:'🔒'; el.style.opacity=ok?'1':'0.6'; } }); }
 // buttons
 document.getElementById('bSpell').onclick=openSpells; document.getElementById('bMap').onclick=openMap; document.getElementById('bBag').onclick=openBag; document.getElementById('bMenu').onclick=openMenu;
-document.getElementById('bUndo').onclick=undo; document.getElementById('raceStop').onclick=()=>raceEnd(false);
+document.getElementById('bUndo').onclick=undo; setMode('explore',true); document.getElementById('raceStop').onclick=()=>raceEnd(false);
 
 // ================= Save / load =================
 let uniName='Einhorn', uniColor='#ffffff', hornColor='#ffd84d', tutorial=0, uiScale='m', lefty=false; let visited=new Set(), knownPlaces=[];
@@ -1270,9 +1339,12 @@ function startTutorial(){ tutorial=0; tutShown=-1; tutStart.x=P.x; tutStart.z=P.
 window.addEventListener('pagehide',save); document.addEventListener('visibilitychange',()=>{ if(document.hidden) save(); });
 
 // NPC name labels
-const labelPool=[]; { const host=document.getElementById('labels'); for(let i=0;i<8;i++){ const d=document.createElement('div'); d.className='nlabel'; host.appendChild(d); labelPool.push(d); } }
+const labelPool=[]; { const host=document.getElementById('labels'); for(let i=0;i<10;i++){ const d=document.createElement('div'); d.className='nlabel'; host.appendChild(d); labelPool.push(d); } }
 const _lv=new THREE.Vector3();
-function updateLabels(){ let i=0; const W=window.innerWidth, H=window.innerHeight; for(const n of npcs){ if(i>=labelPool.length) break; const d=Math.hypot(n.x-P.x,n.z-P.z); if(d>14) continue; _lv.set(n.x,n.y+2.5,n.z).project(camera); if(_lv.z>1) continue; const el=labelPool[i++]; const open=n.def.mayor && !questsDone.has(n.v.id+':'+n.v.questIdx); el.textContent=(n.def.mayor?'🎩 ':'')+n.def.name+(open?' ❗':''); el.className='nlabel'+(open?' q':''); el.style.display='block'; el.style.left=((_lv.x+1)/2*W)+'px'; el.style.top=((1-_lv.y)/2*H)+'px'; el.style.opacity=d>10?String(1-(d-10)/4):'1'; } for(;i<labelPool.length;i++) labelPool[i].style.display='none'; }
+function updateLabels(){ let i=0; const W=window.innerWidth, H=window.innerHeight;
+  // Dorfnamen schweben über dem Brunnen (von weitem lesbar)
+  for(const v of villagesNear(P.x,P.z,80)){ if(i>=labelPool.length) break; const d=Math.hypot(v.cx-P.x,v.cz-P.z); if(d<10||d>90) continue; _lv.set(v.cx,v.h+9,v.cz).project(camera); if(_lv.z>1||Math.abs(_lv.x)>1.1||Math.abs(_lv.y)>1.1) continue; const el=labelPool[i++]; const s=v.story; el.textContent=(s?s.e+' ':'🏘️ ')+v.name; el.className='nlabel village'; el.style.display='block'; el.style.left=((_lv.x+1)/2*W)+'px'; el.style.top=((1-_lv.y)/2*H)+'px'; el.style.opacity=d>70?String(1-(d-70)/20):'1'; }
+  for(const n of npcs){ if(i>=labelPool.length) break; const d=Math.hypot(n.x-P.x,n.z-P.z); if(d>14) continue; _lv.set(n.x,n.y+2.5,n.z).project(camera); if(_lv.z>1) continue; const el=labelPool[i++]; const open=n.def.mayor && !questsDone.has(n.v.id+':'+n.v.questIdx); el.textContent=(n.def.mayor?'🎩 ':'')+n.def.name+(open?' ❗':''); el.className='nlabel'+(open?' q':''); el.style.display='block'; el.style.left=((_lv.x+1)/2*W)+'px'; el.style.top=((1-_lv.y)/2*H)+'px'; el.style.opacity=d>10?String(1-(d-10)/4):'1'; } for(;i<labelPool.length;i++) labelPool[i].style.display='none'; }
 function applyUi(){ document.body.classList.remove('ui-s','ui-l','lefty'); if(uiScale==='s') document.body.classList.add('ui-s'); if(uiScale==='l') document.body.classList.add('ui-l'); if(lefty) document.body.classList.add('lefty'); }
 // ================= Init & loop =================
 for(let i=0;i<14;i++) butterflies.push(makeButterfly()); for(let i=0;i<7;i++) bunnies.push(makeBunny());
