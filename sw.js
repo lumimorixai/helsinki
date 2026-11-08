@@ -1,6 +1,6 @@
 // Einhorn-Blockwelt Service Worker – network-first für die Seite, cache-first für große statische Dateien
-const CACHE='einhornwelt-v20261108q';
-const STATIC=['./three.min.js','./postfx.js','./manifest.json','./icon-192.png','./icon-512.png','./apple-touch-icon.png'];
+const CACHE='einhornwelt-v20261108r';
+const STATIC=['./three.min.js','./postfx.js','./manifest.json','./icon-192.png','./icon-512.png','./apple-touch-icon.png','./art/kap1.svg','./art/kap2.svg','./art/kap3.svg','./art/kap4.svg','./art/kap5.svg','./art/kap6.svg','./art/finale.svg','./art/nacht.svg'];
 self.addEventListener('install',e=>{ e.waitUntil(caches.open(CACHE).then(c=>c.addAll(STATIC.concat(['./index.html','./']))).then(()=>self.skipWaiting())); });
 self.addEventListener('activate',e=>{ e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())); });
 self.addEventListener('fetch',e=>{ const req=e.request; if(req.method!=='GET') return; const url=new URL(req.url); if(url.origin!==location.origin) return;
