@@ -202,7 +202,7 @@
   <div class="card">
     <button class="xbtn hidden" id="startX" title="Schließen">✕</button>
     <div id="logo"><img src="icon-192.png" alt=""><h1>Einhorn-<span>Blockwelt</span></h1></div>
-    <div id="verLabel" style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 11.4</div>
+    <div id="verLabel" style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 11.5</div>
     <p>Eine riesige Zauberwelt voller Dörfer, Ponys, Sterne und Geheimnisse. Lerne Zaubersprüche, baue, flieg – und finde den Schatz! 🌟</p>
     <div id="profiles"></div>
     <input id="nameIn" maxlength="16" placeholder="Wie heißt dein Einhorn?" value="" autocomplete="off">
@@ -592,7 +592,12 @@ matWater.onBeforeCompile=sh=>{ sh.uniforms.uT=fxTime; sh.vertexShader=sh.vertexS
   { vec3 wp=(modelMatrix*vec4(position,1.0)).xyz; float up=step(0.9,normal.y); transformed.y+=up*(sin(uT*1.4+wp.x*0.8+wp.z*0.5)*0.05+sin(uT*2.3-wp.z*1.1+wp.x*0.3)*0.03); }`).replace('#include <uv_vertex>',`#include <uv_vertex>
   vUv+=vec2(sin(uT*0.5)*0.0015,cos(uT*0.4)*0.0015);`); };
 const _tc=new THREE.Color();
-function blockTint(t,x,y,z,out){ if(t===T.DACH){ const v=inVillage(x,z,6); out.set(v?v.roof:'#e65a7a'); out.multiplyScalar(1.05); return out; } const inf=B[t]; if(inf.rainbow){ out.set(RAINBOW[((x+y+z*2)%7+7)%7]); return out; } out.setRGB(1,1,1); if(t===T.LAMPE){ out.setRGB(2.2,2.0,1.6); return out; } if(t===T.WOLKE){ out.setRGB(1.75,1.75,1.8); return out; } if(t===T.HERZKRISTALL_AN){ out.setRGB(1.8,1.5,1.7); return out; } if(t===T.GOLD||t===T.GLITZER||t===T.DIAMANT){ out.setRGB(1.25,1.25,1.2); return out; } const v=(hash(x*7+y*3,z*5+y)-0.5); if(t===T.GRAS||t===T.WATTE||t===T.LILA||t===T.BLUETE||t===T.TUFT||t===T.LAUB||t===T.NADEL){ const s=1+v*(t===T.LAUB||t===T.NADEL?0.22:0.12); out.setRGB(s,s*(1+v*0.06),s); } return out; }
+const PALE_T=new Set([T.DACH,T.WATTE,T.LILA,T.LAUB,T.BIRKE,T.BLUME,T.GRAS]);
+function paleVillage(x,z){ const v=inVillage(x,z,10); return (v&&v.story&&typeof villageLit==='function'&&!villageLit(v))?v:null; }
+function blockTint(t,x,y,z,out){ if(t===T.DACH){ const v=inVillage(x,z,6); out.set(v?v.roof:'#e65a7a'); out.multiplyScalar(1.05); if(v&&paleVillage(x,z)){ out.setRGB(0.62,0.6,0.66); } return out; }
+  if(PALE_T.has(t)&&paleVillage(x,z)){ blockTintBase(t,x,y,z,out); const g=(out.r+out.g+out.b)/3; const k=t===T.BLUME?0.45:0.7; out.setRGB(out.r+(g-out.r)*k,out.g+(g-out.g)*k,out.b+(g-out.b)*k); if(t===T.GRAS) out.multiply(new THREE.Color(0.8,0.78,0.84)); else if(t===T.BLUME) out.multiply(new THREE.Color(0.82,0.8,0.84)); else out.multiply(new THREE.Color(0.68,0.66,0.74)); return out; }
+  return blockTintBase(t,x,y,z,out); }
+function blockTintBase(t,x,y,z,out){ const inf=B[t]; if(inf.rainbow){ out.set(RAINBOW[((x+y+z*2)%7+7)%7]); return out; } out.setRGB(1,1,1); if(t===T.LAMPE){ out.setRGB(2.2,2.0,1.6); return out; } if(t===T.WOLKE){ out.setRGB(1.75,1.75,1.8); return out; } if(t===T.HERZKRISTALL_AN){ out.setRGB(1.8,1.5,1.7); return out; } if(t===T.GOLD||t===T.GLITZER||t===T.DIAMANT){ out.setRGB(1.25,1.25,1.2); return out; } const v=(hash(x*7+y*3,z*5+y)-0.5); if(t===T.GRAS||t===T.WATTE||t===T.LILA||t===T.BLUETE||t===T.TUFT||t===T.LAUB||t===T.NADEL){ const s=1+v*(t===T.LAUB||t===T.NADEL?0.22:0.12); out.setRGB(s,s*(1+v*0.06),s); } return out; }
 function meshChunk(c){
   for(const m of c.meshes){ scene.remove(m); m.geometry.dispose(); } c.meshes=[];
   const d=c.data, x0=c.cx*CH, z0=c.cz*CH;
@@ -761,7 +766,7 @@ function updateNpcs(dt,time){ const el=Math.sin((dayTime-0.25)*Math.PI*2); const
     if(dp<4){ n.moving=false; n.yaw+= (Math.atan2(P.x-n.x,P.z-n.z)-n.yaw)*Math.min(1,dt*5); }
     else if(n.t<=0){ if(n.moving){ n.moving=false; n.t=1+Math.random()*3; } else { const a=Math.random()*Math.PI*2; const r=2+Math.random()*5; n.tx=n.home.x+Math.cos(a)*r; n.tz=n.home.z+Math.sin(a)*r; n.moving=true; n.t=2+Math.random()*2; } }
     if(n.moving){ const dx=n.tx-n.x, dz=n.tz-n.z, d=Math.hypot(dx,dz); if(d<0.3){ n.moving=false; n.t=1+Math.random()*3; } else { const sp=1.4; const nx=n.x+dx/d*sp*dt, nz=n.z+dz/d*sp*dt; const gy=topY(Math.round(nx),Math.round(nz))+0.5; if(gy-n.y<1.2){ n.x=nx; n.z=nz; n.y+= (gy-n.y)*Math.min(1,dt*8); n.yaw=Math.atan2(dx,dz); n.phase+=dt*4; } else { n.moving=false; n.t=1; } } }
-    n.U.g.position.set(n.x,n.y+Math.sin(time*2+n.x)*0.02,n.z); n.U.g.rotation.y=n.yaw; const sw=n.moving?Math.sin(n.phase)*0.6:0; n.U.legs.forEach((l,i)=>{ l.rotation.x=(i===0||i===3)?sw:-sw; }); n.U.mane.forEach((c,i)=>{ c.position.x=Math.sin(time*3+i)*0.04; }); } }
+    if(n.dance>0){ n.dance-=dt; n.moving=false; n.yaw+=dt*3; } const hop=n.dance>0?Math.abs(Math.sin(time*7+n.x))*0.45:0; n.U.g.position.set(n.x,n.y+Math.sin(time*2+n.x)*0.02+hop,n.z); n.U.g.rotation.y=n.yaw; const sw=n.moving?Math.sin(n.phase)*0.6:0; n.U.legs.forEach((l,i)=>{ l.rotation.x=(i===0||i===3)?sw:-sw; }); n.U.mane.forEach((c,i)=>{ c.position.x=Math.sin(time*3+i)*0.04; }); } }
 function tapNpc(nd){ const n=pickNear(nd,npcs.filter(n=>!n.inside),n=>({x:n.x,y:n.y+1.1,z:n.z}),1.3,16); if(!n) return false; talkNpc(n); return true; }
 
 // ================= Animals =================
@@ -1136,8 +1141,23 @@ function openChest(){ if(done.has('schatz')) return; mission('schatz'); placeChe
 // ================= Erweiterung: Haustiere, Möbel/Truhen/Türen, Setzlinge, Weltlicht =================
 // ---- Weltlicht (Dörfer zum Leuchten bringen) ----
 function litVillages(){ let n=0; for(const id of questsDone){ n++; } return n; }
-function lightVillage(v){ const H=v.h; setB(v.cx,H+5,v.cz,T.HERZKRISTALL_AN); recordEdit(v.cx,H+5,v.cz,T.HERZKRISTALL_AN); for(let i=0;i<6;i++) setTimeout(()=>spawn(v.cx,H+6,v.cz,['#ff9ec4','#fff3a0','#ffffff'],70,6,7,2),i*220); sfx('fanfare');
+function lightVillage(v){ const H=v.h; setB(v.cx,H+5,v.cz,T.HERZKRISTALL_AN); recordEdit(v.cx,H+5,v.cz,T.HERZKRISTALL_AN); for(let i=0;i<6;i++) setTimeout(()=>spawn(v.cx,H+6,v.cz,['#ff9ec4','#fff3a0','#ffffff'],70,6,7,2),i*220); sfx('fanfare'); villageFest(v);
   const n=litVillages(); if(n>=3) mission('light3'); if(n>=6) mission('allspells'); }
+// Dorffest: Farbe kehrt in einer Welle zurück, Blumen sprießen, Laternen gehen an, Ponys hüpfen, Feuerwerk
+let festT=0, festV=null;
+function villageFest(v){ festV=v; festT=10; const R0=v.r+10; const dirty=[]; for(const c of chunks.values()){ const cx=c.cx*CH+CH/2, cz=c.cz*CH+CH/2; if(Math.hypot(cx-v.cx,cz-v.cz)<R0+CH) dirty.push(c); }
+  // Farbwelle von innen nach außen: Chunks nach Abstand sortiert neu bauen
+  dirty.sort((a,b)=>Math.hypot(a.cx*CH+8-v.cx,a.cz*CH+8-v.cz)-Math.hypot(b.cx*CH+8-v.cx,b.cz*CH+8-v.cz)); dirty.forEach((c,i)=>setTimeout(()=>{ c.dirty=true; },300+i*140));
+  // Blumen sprießen rund ums Dorf (nur auf freiem Gras)
+  const L=[]; let tries=0; while(L.length<28&&tries<300){ tries++; const a=Math.random()*6.28, r=4+Math.random()*(v.r-2); const x=Math.round(v.cx+Math.cos(a)*r), z=Math.round(v.cz+Math.sin(a)*r); const y=topY(x,z); if(get(x,y,z)===T.GRAS&&get(x,y+1,z)===T.AIR) L.push([x,y+1,z,T.BLUME]); }
+  // Laternen auf vier Seiten
+  for(const [dx,dz] of [[9,9],[-9,9],[9,-9],[-9,-9]]){ const x=v.cx+dx, z=v.cz+dz; const y=topY(x,z); if(get(x,y+1,z)===T.AIR&&get(x,y+2,z)===T.AIR){ L.push([x,y+1,z,T.ZAUN],[x,y+2,z,T.LAMPE]); } }
+  L.forEach((b,i)=>setTimeout(()=>{ setB(b[0],b[1],b[2],b[3]); recordEdit(b[0],b[1],b[2],b[3]); if(b[3]===T.BLUME&&i%3===0) spawn(b[0]+0.5,b[1]+0.5,b[2]+0.5,['#ff9ec4','#ffffff'],6,1,1.5,0.6); },600+i*90));
+  // Ponys hüpfen
+  for(const n of npcs) if(n.v===v) n.dance=9;
+  // Feuerwerk
+  for(let i=0;i<10;i++) setTimeout(()=>{ const a=Math.random()*6.28, r=4+Math.random()*10; spawn(v.cx+Math.cos(a)*r,v.h+9+Math.random()*6,v.cz+Math.sin(a)*r,[RAINBOW[i%7],'#ffffff','#fff3a0'],60,5,6,1.6); sfx(i%3?'star':'fanfare'); },900+i*650);
+  setTimeout(()=>toast(`🎉 Dorffest in ${v.name}! Die Farben sind zurück.`,true),1200); }
 function worldLightHtml(){ const n=litVillages(); return `<div class="goal">💗 <b>Weltlicht:</b> ${n} ${n===1?'Dorf leuchtet':'Dörfer leuchten'} wieder${n>=6?' – der große Regenbogen ist zurück! 🌈':' · Ziel: 6'}</div>`; }
 let finaleDone=false;
 function checkFinale(){ if(finaleDone||done.has('finale')) return; if(litVillages()>=6){ finaleDone=true; done.add('finale'); save(); setTimeout(()=>{ const L=[]; for(const r of [16,15,14]) for(let a=0;a<=Math.PI;a+=0.01){ const x=Math.round(r*Math.cos(a)), y=Math.round(SEA+6+r*Math.sin(a)); if(!get(x,y,-12)) L.push([x,y,-12,T.REGEN]); } applyChanges(L); teleportTo(0,2); setTimeout(()=>{ for(let i=0;i<10;i++) setTimeout(()=>spawn(P.x,P.y+3,P.z,RAINBOW,90,10,8,2.5),i*250); sfx('fanfare'); dialog('🌈 Das Licht ist zurück!',`${kapImg('finale')}<p style="text-align:center">Alle sechs Dörfer leuchten wieder, ${esc(uniName)}! Über Sternendorf steht jetzt für immer der große Regenbogen.<br><br>Die Ponys werden noch lange von dir erzählen. Die Welt gehört dir – bau, flieg, zaubere und entdecke weiter, so viel du willst. 👑</p>`,[['Juhu! 🦄',null]]); },3500); },800); } }
