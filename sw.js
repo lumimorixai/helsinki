@@ -1,5 +1,5 @@
 // Einhorn-Blockwelt Service Worker – network-first für die Seite, cache-first für große statische Dateien
-const CACHE='einhornwelt-v20261108p';
+const CACHE='einhornwelt-v20261108q';
 const STATIC=['./three.min.js','./postfx.js','./manifest.json','./icon-192.png','./icon-512.png','./apple-touch-icon.png'];
 self.addEventListener('install',e=>{ e.waitUntil(caches.open(CACHE).then(c=>c.addAll(STATIC.concat(['./index.html','./']))).then(()=>self.skipWaiting())); });
 self.addEventListener('activate',e=>{ e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())); });
