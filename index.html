@@ -65,6 +65,7 @@
   #modeSeg button{border:0;background:transparent;border-radius:22px;padding:4px 12px;font:inherit;font-size:20px;line-height:1;display:flex;flex-direction:column;align-items:center;gap:1px;color:#6b4f8a;min-width:64px;touch-action:manipulation}
   #modeSeg button small{font-size:10px;font-weight:700}
   .ico{display:inline-flex;width:1em;height:1em;vertical-align:-0.15em} .ico svg{width:100%;height:100%;display:block}
+  .ico.hp{color:#ff4d6d} .ico.hp.off{color:#c9b8d8} #cicon .ico,.gicon .ico{width:1.1em;height:1.1em} #pname .ico{color:#a05fd0} .stars .ico{color:#f2b800} .ico.inl{color:#8a5fb0;width:1.05em;height:1.05em}
   #modeSeg button .ico{width:24px;height:24px} #modeSeg button .lbl{font-size:10px;font-weight:700}
   .btn.round .ico,#flyBtn .ico,#jump .ico,#down .ico,#bUndo .ico{width:1.1em;height:1.1em}
   #dlgPortrait{width:92px;height:92px;margin:-4px auto 6px;filter:drop-shadow(0 6px 14px rgba(120,80,160,.25))} #dlgPortrait svg{width:100%;height:100%}
@@ -163,7 +164,7 @@
 <div id="hud" class="hidden">
   <div id="top">
     <div id="left">
-      <div class="badge"><span id="pname">🦄 Einhorn</span><span class="stars">🌟 <span id="starcount">0</span></span><span id="hearts" class="hidden"></span></div>
+      <div class="badge"><span id="pname"><span class="ico" id="pico"></span> Einhorn</span><span class="stars"><span class="ico" id="sico"></span> <span id="starcount">0</span></span><span id="hearts" class="hidden"></span></div>
       <div id="compass"><div id="cdial"><svg id="arrow" viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="ng" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff5f9e"/><stop offset="1" stop-color="#ffb36b"/></linearGradient></defs><path d="M20 3 L28 25 L20 20.5 L12 25 Z" fill="url(#ng)"/><path d="M20 37 L12 25 L20 20.5 L28 25 Z" fill="#d9c7ff" opacity=".9"/></svg><span id="cicon">⭐</span></div><div id="ctext"><b id="compassName">Stern</b><span id="compassTxt">–</span><span id="place"></span></div></div>
       <div class="badge hidden" id="race">🏁 <span id="raceTxt"></span></div>
       <button class="btn small hidden" id="raceStop" style="background:linear-gradient(135deg,#ff6f91,#ffb36b);color:#fff">⏹ Rennen beenden</button>
@@ -197,7 +198,7 @@
   <div class="card">
     <button class="xbtn hidden" id="startX" title="Schließen">✕</button>
     <h1>Einhorn-Blockwelt</h1>
-    <div id="verLabel" style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 10.9</div>
+    <div id="verLabel" style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 11.0</div>
     <p>Eine riesige Zauberwelt voller Dörfer, Ponys, Sterne und Geheimnisse. Lerne Zaubersprüche, baue, flieg – und finde den Schatz! 🌟</p>
     <input id="nameIn" maxlength="16" placeholder="Wie heißt dein Einhorn?" value="" autocomplete="off">
     <div class="lbl">Fellfarbe</div><div class="swatches" id="swatches"></div>
@@ -802,7 +803,7 @@ function updateZombies(dt,time){ const el=Math.sin((dayTime-0.25)*Math.PI*2); co
   // regen
   if(zombieMode && hp<maxHp && time-lastHurt>6 && (time%8)<dt) { hp=Math.min(maxHp,hp+1); updateHearts(); } }
 function hurt(n,msg){ if(!zombieMode) return; if(shieldT>0 && msg && msg.indexOf('Zombie')>=0){ spawn(P.x,P.y+1,P.z,['#ff9ec4','#ffffff'],12,2,2,0.5); sfx('place'); return; } if(armor && msg && msg.indexOf('Zombie')>=0){ armorDur--; sfx('remove'); spawn(P.x,P.y+1,P.z,['#ffffff','#ffd84d'],10,2,2,0.5); if(armorDur<=0){ const r=RECIPES.find(x=>x.id===armor); toast(`${r?r.e:''} Deine Decke ist zerrissen!`,true); armor=null; buildUnicorn(uniColor,hornColor); } else toast(`🧶 Decke hat dich geschützt (${armorDur} übrig)`); save(); return; } hp-=n; lastHurt=timeAcc; sfx('hurt'); spawn(P.x,P.y+1,P.z,['#ff5e7e','#ffffff'],15,2,2,0.6); updateHearts(); if(msg) toast(msg); document.body.classList.add('hurt'); setTimeout(()=>document.body.classList.remove('hurt'),300); if(hp<=0) die(); }
-function updateHearts(){ const el=document.getElementById('hearts'); if(!zombieMode){ el.classList.add('hidden'); return; } el.classList.remove('hidden'); let s=''; for(let i=0;i<maxHp;i++) s+=i<hp?'❤️':'🖤'; el.textContent=s+(armor?' 🧶'+armorDur:''); }
+function updateHearts(){ const el=document.getElementById('hearts'); if(!zombieMode){ el.classList.add('hidden'); return; } el.classList.remove('hidden'); let s=''; for(let i=0;i<maxHp;i++) s+=(typeof iconHTML==='function')?iconHTML(i<hp?'heart':'heartoff',i<hp?'hp':'hp off'):(i<hp?'❤️':'🖤'); el.innerHTML=s+(armor?' 🧶'+armorDur:''); }
 function tapZombie(nd){ const zb=pickNear(nd,zombies,z=>({x:z.x,y:z.y+1,z:z.z}),1.2,10); if(!zb||zb.hitT>0) return false; zb.hp--; zb.hitT=0.5; const dx=zb.x-P.x, dz=zb.z-P.z, d=Math.hypot(dx,dz)||1; zb.vx+=dx/d*8; zb.vz+=dz/d*8; zb.vy=5; sfx('remove'); spawn(zb.x,zb.y+1.2,zb.z,['#5aa64a','#ffffff'],12,2,2,0.6);
   if(zb.hp<=0){ scene.remove(zb.g); zombies.splice(zombies.indexOf(zb),1); spawn(zb.x,zb.y+1,zb.z,['#5aa64a','#8ff0d2','#ffffff'],40,3,4,1); addItem('schleim',1); stats.zombies=(stats.zombies||0)+1; toast('🧟 Zombie besiegt! 🧪 Schleim: '+inv.schleim); if(stats.zombies>=5) mission('zombies'); } else toast('🧟 Getroffen! Noch '+zb.hp+' Treffer'); return true; }
 function die(){ hp=maxHp; const n=Object.values(inv).reduce((a,b)=>a+b,0); for(const zb of zombies) scene.remove(zb.g); zombies.length=0;
@@ -1429,7 +1430,7 @@ const ICON={
   wand:_I('<path d="M4 20L15 9"/><path d="M15 9l2 2"/><path d="M18 3v3M16.5 4.5h3M19 9l1 2 2 1-2 1-1 2-1-2-2-1 2-1z" fill="currentColor"/>'),
   map:_I('<path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/>'),
   menu:_I('<path d="M4 7h16M4 12h16M4 17h16"/>'),
-  fly:_I('<path d="M12 19q-9-3-10-12q7 0 10 6z" fill="currentColor" stroke="none" opacity="0.55"/><path d="M12 19q9-3 10-12q-7 0-10 6z" fill="currentColor" stroke="none" opacity="0.55"/><path d="M12 4v16"/>'),
+  fly:_I('<path d="M21 4q-9 0-14 7l-4-1 3 4-1 4 4-2q7-1 10-8q2-2 2-4z" fill="currentColor" stroke="none"/><path d="M9 12q4-6 11-7" stroke="#fff" stroke-width="1.6" opacity="0.8"/><circle cx="5.5" cy="11" r="0.9" fill="#fff" stroke="none"/>'),
   up:_I('<path d="M12 19V6"/><path d="M6 12l6-6 6 6"/>'),
   down:_I('<path d="M12 5v13"/><path d="M6 12l6 6 6-6"/>'),
   undo:_I('<path d="M9 14L4 9l5-5"/><path d="M4 9h9a6 6 0 0 1 0 12h-2"/>'),
@@ -1443,11 +1444,27 @@ const ICON={
   close:_I('<path d="M6 6l12 12M18 6L6 18"/>'),
   home:_I('<path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-6h4v6"/>'),
   race:_I('<path d="M5 21V4"/><path d="M5 4h13l-3 4 3 4H5"/>'),
-  book:_I('<path d="M4 5q4-2 8 0v15q-4-2-8 0z"/><path d="M12 5q4-2 8 0v15q-4-2-8 0z"/>')
+  book:_I('<path d="M4 5q4-2 8 0v15q-4-2-8 0z"/><path d="M12 5q4-2 8 0v15q-4-2-8 0z"/>'),
+  target:_I('<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/>'),
+  ring:_I('<circle cx="12" cy="12" r="8" stroke-width="3.5"/>'),
+  sparkle:_I('<path d="M12 2l2.2 6.8L21 11l-6.8 2.2L12 20l-2.2-6.8L3 11l6.8-2.2z" fill="currentColor" stroke="none"/><circle cx="19" cy="19" r="1.6" fill="currentColor" stroke="none"/>'),
+  lolli:_I('<circle cx="12" cy="9" r="6"/><path d="M12 15v7"/><path d="M9 9a3 3 0 0 1 6 0a3 3 0 0 1-6 0"/>'),
+  boat:_I('<path d="M3 15h18l-3 5H6z" fill="currentColor" stroke="none"/><path d="M12 3v12"/><path d="M12 4q7 3 7 10H12z" fill="currentColor" stroke="none" opacity="0.6"/>'),
+  sunflower:_I('<circle cx="12" cy="12" r="3.5" fill="currentColor" stroke="none"/><g fill="currentColor" stroke="none" opacity="0.7"><circle cx="12" cy="4.5" r="2.4"/><circle cx="12" cy="19.5" r="2.4"/><circle cx="4.5" cy="12" r="2.4"/><circle cx="19.5" cy="12" r="2.4"/><circle cx="6.7" cy="6.7" r="2.2"/><circle cx="17.3" cy="17.3" r="2.2"/><circle cx="17.3" cy="6.7" r="2.2"/><circle cx="6.7" cy="17.3" r="2.2"/></g>'),
+  snow:_I('<path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7M12 2l-3 3M12 2l3 3M12 22l-3-3M12 22l3-3"/>'),
+  cloud:_I('<path d="M7 18h10a4 4 0 0 0 .5-8A6 6 0 0 0 6 11.5 3.3 3.3 0 0 0 7 18z" fill="currentColor" stroke="none"/>'),
+  unicorn:_I('<path d="M4 21v-6q0-6 6-7l2-3 2 3q2 0 3 1l4 3-2 2-2-1v8z" fill="currentColor" stroke="none"/><path d="M11 6.5l2.5-5.5 1 6" fill="currentColor" stroke="none" opacity="0.85"/><circle cx="14.5" cy="12" r="1.1" fill="#fff" stroke="none"/><path d="M4 15q2-6 6-7" stroke="#fff" stroke-width="1.5" opacity="0.7"/>'),
+  village:_I('<path d="M3 20v-8l5-4 5 4v8z" fill="currentColor" stroke="none" opacity="0.8"/><path d="M13 20v-9l4-3 4 3v9z" fill="currentColor" stroke="none"/>'),
+  gift:_I('<rect x="4" y="10" width="16" height="10" rx="1.5"/><path d="M4 10h16M12 10v10M8 7q0-3 4 3q4-6 4-3q0 3-4 3q-4 0-4-3z"/>'),
+  heartoff:_I('<path d="M12 20s-7-4.5-9-9a5 5 0 0 1 9-3 5 5 0 0 1 9 3c-2 4.5-9 9-9 9z"/>')
 };
+const EMOJI_ICON={'🎩':'hat','⭐':'star','🌟':'star','🎒':'bag','🎯':'target','⭕':'ring','✨':'sparkle','🧱':'brick','🏘️':'village','🍭':'lolli','⛵':'boat','🌻':'sunflower','❄️':'snow','☁️':'cloud','🏁':'race','🦄':'unicorn','🎁':'gift','🕊️':'fly','🪄':'wand','🐾':'paw','⛏️':'pick','🗺️':'map','🏡':'home','🏠':'home','📜':'book','☀️':'sun','💗':'heart','❤️':'heart'};
+const _EMOJI_RE=new RegExp(Object.keys({'🎩':1,'⭐':1,'🌟':1,'🎒':1,'🎯':1,'⭕':1,'✨':1,'🧱':1,'🏘️':1,'🍭':1,'⛵':1,'🌻':1,'❄️':1,'☁️':1,'🏁':1,'🦄':1,'🎁':1,'🕊️':1,'🪄':1,'🐾':1,'⛏️':1,'🗺️':1,'🏡':1,'🏠':1,'📜':1,'☀️':1,'💗':1,'❤️':1}).map(e=>e.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|'),'g');
+function iconizeText(html){ return (html||'').replace(_EMOJI_RE,m=>iconHTML(EMOJI_ICON[m],'inl')); }
+function iconize(e,cls){ const k=EMOJI_ICON[(e||'').trim()]; return k?iconHTML(k,cls):esc(e||''); }
 function iconHTML(key,cls){ return `<span class="ico ${cls||''}">${ICON[key]||''}</span>`; }
 function applyIcons(){ const set=(sel,key,label)=>{ document.querySelectorAll(sel).forEach(el=>{ el.innerHTML=iconHTML(key)+(label?`<span class="lbl">${label}</span>`:''); }); };
-  set('#bBag','bag'); set('#bSpell','wand'); set('#bMap','map'); set('#bMenu','menu'); set('#bUndo','undo'); set('#flyBtn','fly');
+  const pi=document.getElementById('pico'); if(pi) pi.innerHTML=ICON.unicorn; const si=document.getElementById('sico'); if(si) si.innerHTML=ICON.star; set('#bBag','bag'); set('#bSpell','wand'); set('#bMap','map'); set('#bMenu','menu'); set('#bUndo','undo'); set('#flyBtn','fly');
   set('#modeSeg [data-m="explore"]','paw','Entdecken'); set('#modeSeg [data-m="build"]','brick','Bauen'); set('#modeSeg [data-m="remove"]','pick','Abbauen');
   const up=document.querySelector('#jump'); if(up) up.innerHTML=iconHTML('up'); const dn=document.querySelector('#down'); if(dn) dn.innerHTML=iconHTML('down');
   const lk=document.getElementById('lknob'); if(lk) lk.innerHTML=iconHTML('look'); }
@@ -1631,7 +1648,7 @@ if(saved){ document.getElementById('newGame').classList.remove('hidden'); } docu
 document.getElementById('elternInfo').onclick=(e)=>{ e.preventDefault(); dialog('🛡️ Infos für Eltern',`<p><b>Was das Spiel ist:</b> ein offenes Bau‑ und Entdeckerspiel für Kinder ab etwa 8 Jahren – ohne Waffen, ohne Zeitdruck, ohne Verlieren‑Zwang.</p><p><b>Sicherheit:</b> Es gibt keinen Chat, keine Fremden, keine In‑App‑Käufe, keine Werbung, keine Anmeldung und keine Datenerhebung. Das Spiel läuft komplett im Browser; der Spielstand liegt ausschließlich auf diesem Gerät.</p><p><b>Zombies:</b> Nachts erscheinen comichafte Zombies, die man mit Zaubern vertreibt oder durch Schlafen im Bett meidet. Sie lassen sich in den Einstellungen jederzeit ausschalten – dann ist es ein reines Kreativspiel.</p><p><b>Spielzeit:</b> Es gibt keine Belohnungen fürs Dranbleiben und keine Benachrichtigungen. Ein Spieltag dauert etwa 10 Minuten – eine gute natürliche Pause.</p><p><b>Teilen:</b> Über „Welt teilen“ entsteht ein Text‑Code mit den Bauten; er enthält keine persönlichen Daten.</p>`,[['Alles klar',null]]); };
 document.getElementById('startX').onclick=()=>{ document.getElementById('start').classList.add('hidden'); }; document.getElementById('starcount').textContent=collected.size; refreshPalette();
 document.getElementById('nameIn').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('go').click(); } });
-document.getElementById('go').onclick=()=>{ if(night||dayTime>0.65) { dayTime=0.3; applySky(); } uniName=(document.getElementById('nameIn').value.trim()||'Einhorn').slice(0,16); document.getElementById('pname').textContent='🦄 '+uniName; buildUnicorn(uniColor,hornColor); save(); document.getElementById('start').classList.add('hidden'); document.getElementById('hud').classList.remove('hidden'); sfx('magic'); if(musicOn) startMusic();
+document.getElementById('go').onclick=()=>{ if(night||dayTime>0.65) { dayTime=0.3; applySky(); } uniName=(document.getElementById('nameIn').value.trim()||'Einhorn').slice(0,16); document.getElementById('pname').innerHTML=iconHTML('unicorn')+' '+esc(uniName); buildUnicorn(uniColor,hornColor); save(); document.getElementById('start').classList.add('hidden'); document.getElementById('hud').classList.remove('hidden'); sfx('magic'); if(musicOn) startMusic();
   if(!started){ started=true; if(tutorial>=TUT.length) toast('Willkommen zurück! 🌟',true); else if(tutorial===0 && !stats.introSeen){ stats.introSeen=1; setTimeout(introStory,600); } else { tutShown=-1; setTimeout(tutorialTick,1200); } } };
 const TUT=[
   {t:'Lauf los! '+(isTouch?'Schieb den Stick unten links. 🕹️':'Drück W A S D oder die Pfeiltasten. 🏃'), check:()=>Math.hypot(P.x-tutStart.x,P.z-tutStart.z)>3},
@@ -1648,7 +1665,7 @@ const TUT=[
 let tutShown=-1; const tutStart={x:0,z:0,yaw:0}; let nbCache={t:0,v:null,type:0};
 function nearestBlock(type,rad){ if(performance.now()-nbCache.t<1500 && nbCache.type===type) return nbCache.v; let best=null,bd=1e9; const px=Math.round(P.x),pz=Math.round(P.z); for(let x=px-rad;x<=px+rad;x+=1) for(let z=pz-rad;z<=pz+rad;z+=1){ const d=Math.hypot(x-P.x,z-P.z); if(d>bd) continue; const top=topYData(x,z); for(let y=Math.max(1,top-2);y<=top+3;y++){ if(get(x,y,z)===type){ bd=d; best={x,y,z}; break; } } } nbCache={t:performance.now(),v:best,type}; return best; }
 let goalKey='', goalFullUntil=0, goalPinned=false;
-function setGoal(icon,title,text,prog,pulse,short){ const el=document.getElementById('tut'); el.classList.remove('hidden'); document.getElementById('gicon').textContent=icon; document.getElementById('gtitle').textContent=title; document.getElementById('gtext').innerHTML=text; document.getElementById('gshort').innerHTML=short||title; document.getElementById('gfill').style.width=Math.round(Math.max(0,Math.min(1,prog))*100)+'%'; el.classList.toggle('pulse',!!pulse); const key=title+'|'+text; if(key!==goalKey){ goalKey=key; goalFullUntil=performance.now()+7000; goalPinned=false; } el.classList.toggle('mini',!goalPinned&&performance.now()>goalFullUntil); }
+function setGoal(icon,title,text,prog,pulse,short){ const el=document.getElementById('tut'); el.classList.remove('hidden'); document.getElementById('gicon').innerHTML=iconize(icon); document.getElementById('gtitle').textContent=title; document.getElementById('gtext').innerHTML=iconizeText(text); document.getElementById('gshort').innerHTML=iconizeText(short||title); document.getElementById('gfill').style.width=Math.round(Math.max(0,Math.min(1,prog))*100)+'%'; el.classList.toggle('pulse',!!pulse); const key=title+'|'+text; if(key!==goalKey){ goalKey=key; goalFullUntil=performance.now()+7000; goalPinned=false; } el.classList.toggle('mini',!goalPinned&&performance.now()>goalFullUntil); }
 document.getElementById('tut').addEventListener('click',()=>{ const el=document.getElementById('tut'); if(el.classList.contains('mini')){ goalPinned=true; el.classList.remove('mini'); } else { goalPinned=false; goalFullUntil=0; el.classList.add('mini'); } });
 function tutBadge(){ const el=document.getElementById('tut'); if(tutorial>=TUT.length){ el.classList.add('hidden'); return; } const icons=['🏃','👀','🎩','🌸','🎁','🪄','⛏️','🧱','🕊️','🌟']; const shorts=['Lauf los','Schau dich um','Geh zu Sternchen 🎩',()=>`Blumen pflücken ${Math.min(5,inv.blume||0)}/5`,'Blumen abgeben 🎩','Zaubere 🌸 Blühen',()=>`Blöcke abbauen ${Math.min(3,stats.mined||0)}/3`,'Einen Block bauen',()=>`Flugprüfung · Ring ${Math.min(FT.idx+1,4)}/4`,'Fang einen Stern']; const sh=shorts[tutorial]; setGoal(icons[tutorial]||'🎯',`Tutorial · Schritt ${tutorial+1} von ${TUT.length}`,TUT[tutorial].t,tutorial/TUT.length,false,`Schritt ${tutorial+1}/${TUT.length} · ${typeof sh==='function'?sh():sh}`); }
 function tutorialTick(){ if(tutorial>=TUT.length){ document.getElementById('tut').classList.add('hidden'); return; } if(tutShown!==tutorial){ tutShown=tutorial; if(TUT[tutorial].enter) setTimeout(TUT[tutorial].enter,400); } tutBadge(); if(TUT[tutorial].check()){ sfx('mission'); spawn(P.x,P.y+1.5,P.z,['#fff3a0','#ffffff'],25,2,2,0.8); tutorial++; saveSoon(); if(tutorial>=TUT.length){ tutBadge(); setTimeout(tutorialDone,600); } else { toast('✅ Geschafft! Nächster Schritt …'); setTimeout(()=>{ tutShown=-1; tutorialTick(); },1200); } } }
@@ -1728,7 +1745,7 @@ function loop(){ requestAnimationFrame(loop); const now=performance.now(); const
     if(!isTouch&&mouseNDC&&live&&gameMode!=='explore'){ const h=raycast(mouseNDC,camDist+10); if(h){ hl.visible=true; if(removeMode) hl.position.set(h.x,h.y,h.z); else hl.position.set(h.x+h.nx,h.y+h.ny,h.z+h.nz); } else hl.visible=false; } else hl.visible=false;
     // compass + place name
     compassT+=dt; if(compassT>0.2){ compassT=0; let best=null,bd=1e9; let tutT=null; if(tutorial<TUT.length && TUT[tutorial].target){ tutT=TUT[tutorial].target(); } let gT=null; if(!tutT&&!RACE.on&&(tutorial>=TUT.length||lostBag)){ const g=guideTarget(); if(g&&(g.e==='🎒'||Math.hypot(g.x-P.x,g.z-P.z)>30)) gT=g; } if(tutT){ best=tutT; bd=Math.hypot(tutT.x-P.x,tutT.z-P.z); } else if(gT){ best=gT; bd=Math.hypot(gT.x-P.x,gT.z-P.z); } else if(RACE.on&&RACE.rings[RACE.idx]){ const r=RACE.rings[RACE.idx]; best={x:r.x,y:r.y,z:r.z}; bd=Math.hypot(r.x-P.x,r.z-P.z); } else for(const s of activeStars){ const d=Math.hypot(s.x-P.x,s.z-P.z); if(d<bd){ bd=d; best=s; } }
-      const el=document.getElementById('compass'); if(best){ el.style.display=''; const ang=Math.atan2(best.x-P.x,best.z-P.z); const rel=ang-Math.atan2(fx,fz); document.getElementById('arrow').style.transform=`rotate(${-rel*180/Math.PI}deg)`; const dy=best.y-(P.y+1); document.getElementById('cicon').textContent=tutT?'🎯':(gT?gT.e:(RACE.on?'🏁':'⭐')); document.getElementById('compassName').textContent=tutT?'Dein Ziel':(gT?gT.name:(RACE.on?'Nächster Ring':'Nächster Stern')); document.getElementById('compassTxt').textContent=`${Math.round(bd)} Blöcke${dy>4?' · ⬆️ oben':(dy<-4?' · ⬇️ unten':'')}`; } else el.style.display='none';
+      const el=document.getElementById('compass'); if(best){ el.style.display=''; const ang=Math.atan2(best.x-P.x,best.z-P.z); const rel=ang-Math.atan2(fx,fz); document.getElementById('arrow').style.transform=`rotate(${-rel*180/Math.PI}deg)`; const dy=best.y-(P.y+1); document.getElementById('cicon').innerHTML=iconize(tutT?'🎯':(gT?gT.e:(RACE.on?'🏁':'⭐'))); document.getElementById('compassName').textContent=tutT?'Dein Ziel':(gT?gT.name:(RACE.on?'Nächster Ring':'Nächster Stern')); document.getElementById('compassTxt').innerHTML=`${Math.round(bd)} Blöcke${dy>4?' · '+iconHTML('up','inl')+' oben':(dy<-4?' · '+iconHTML('down','inl')+' unten':'')}`; } else el.style.display='none';
       const v=inVillage(P.x,P.z,0); const pe=document.getElementById('place'); const near = v?`· 🏘️ ${v.name}`:(Math.hypot(P.x-CASTLE.x,P.z-CASTLE.z)<14?'· 🏰 Schloss':(Math.hypot(P.x-MOUNT.x,P.z-MOUNT.z)<16?'· 🏔️ Höhlenberg':'')); pe.textContent=near;
       activateVillages(); if(tutorial<TUT.length&&live&&stats.introSeen) tutorialTick(); else if(live) goalBadge(); if(Math.random()<0.1) saveSoon(); }
     updateNpcs(dt,timeAcc); updateLabels(); updateAnimals(dt,timeAcc); updateZombies(dt,timeAcc); updatePets(dt,timeAcc); updateWild(dt,timeAcc); updateEgg(timeAcc); if((timeAcc%2)<dt){ updateSaplings(); activeVillageCats(); placeEgg(); } updateRace(dt,timeAcc); if(chest.visible){ chest.userData.gem.rotation.y=timeAcc*2; chest.userData.gem.position.y=0.6+Math.sin(timeAcc*3)*0.08; }
