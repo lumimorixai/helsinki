@@ -202,7 +202,7 @@
   <div class="card">
     <button class="xbtn hidden" id="startX" title="Schließen">✕</button>
     <div id="logo"><img src="icon-192.png" alt=""><h1>Einhorn-<span>Blockwelt</span></h1></div>
-    <div id="verLabel" style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 11.7</div>
+    <div id="verLabel" style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 11.8</div>
     <p>Eine riesige Zauberwelt voller Dörfer, Ponys, Sterne und Geheimnisse. Lerne Zaubersprüche, baue, flieg – und finde den Schatz! 🌟</p>
     <div id="profiles"></div>
     <input id="nameIn" maxlength="16" placeholder="Wie heißt dein Einhorn?" value="" autocomplete="off">
@@ -475,7 +475,7 @@ function villageBlocks(v){ if(vblocks.has(v.id)) return vblocks.get(v.id); const
 // Wahrzeichen je Dorf-Thema
 function landmark(v,put,H,th){ const cx=v.cx, cz=v.cz; const col=(x,z,y0,y1,t)=>{ for(let y=y0;y<=y1;y++) put(x,y,z,t); }; const disc=(x,y,z,r,t,plane)=>{ for(let a=-r;a<=r;a++) for(let b=-r;b<=r;b++){ if(a*a+b*b>r*r+r*0.6) continue; if(plane==='xz') put(x+a,y,z+b,t); else if(plane==='xy') put(x+a,y+b,z,t); else put(x,y+b,z+a,t); } };
   // Wegweiser-Platz: Sitzbank + Laterne am Dorfeingang (Richtung Weg)
-  if(th==='wiese'){ /* Sternendorf: Blumenring um den Brunnen, Zaun mit Lücken am Blumenbeet */ for(let a=0;a<Math.PI*2;a+=0.5){ const x=Math.round(cx+Math.cos(a)*8), z=Math.round(cz+Math.sin(a)*8); put(x,H+1,z,T.BLUME); } for(let dx=-7;dx<=7;dx++){ if(dx===-4||dx===0||dx===4) continue; put(cx+dx,H+1,cz+11,T.ZAUN); } for(let dx=-6;dx<=6;dx+=2) put(cx+dx,H+1,cz+13,T.BLUME); }
+  if(th==='wiese'){ /* Sternendorf: Blumenring um den Brunnen, Zaun mit Lücken am Blumenbeet */ for(let a=0;a<Math.PI*2;a+=0.5){ const x=Math.round(cx+Math.cos(a)*8), z=Math.round(cz+Math.sin(a)*8); put(x,H+1,z,T.BLUME); } /* Blumenbeet südlich des Brunnens: Zaun-Rechteck x±3, z+4..z+7, drei Lücken an der Südseite */ for(let dx=-3;dx<=3;dx++) for(let dz=4;dz<=7;dz++){ const edge=Math.abs(dx)===3||dz===4||dz===7; if(edge){ if(dz===7&&(dx===-2||dx===0||dx===2)) continue; put(cx+dx,H+1,cz+dz,T.ZAUN); } else put(cx+dx,H+1,cz+dz,T.BLUME); } }
   if(th==='zucker'){ // Riesen-Lolli
     const lx=cx-21, lz=cz; col(lx,lz,H+1,H+7,T.BRETT); for(let r=0;r<=4;r++){ const t=[T.REGEN,T.WATTE,T.LILA,T.WATTE,T.REGEN][r]; for(let a=-4;a<=4;a++) for(let b=-4;b<=4;b++){ const d=Math.round(Math.hypot(a,b)); if(d===r&&!(r===4&&[[4,0],[-4,0],[0,4],[3,-2],[-3,2]].some(g=>g[0]===a&&g[1]===b))) put(lx+a,H+10+b,lz,t); } }
     // Zuckerstangen-Zaun um den Platz
@@ -1365,7 +1365,7 @@ const ghostGeo=new THREE.BoxGeometry(1.04,1.04,1.04); const ghostEdges=new THREE
 function buildTargets(v,kind){ const cx=v.cx, cz=v.cz, H=v.h; const out=[];
   if(kind==='lolli'){ const lx=cx-21, lz=cz; for(const [a,b] of LOLLI_GAPS) out.push({x:lx+a,y:H+10+b,z:lz,t:T.REGEN}); }
   if(kind==='muehle'){ const mx=cx+21, mz=cz, hub=H+7; out.push({x:mx-2,y:hub+3,z:mz,t:T.HOLZ},{x:mx-2,y:hub-3,z:mz,t:T.HOLZ},{x:mx-2,y:hub,z:mz+3,t:T.HOLZ},{x:mx-2,y:hub,z:mz-3,t:T.HOLZ}); }
-  if(kind==='zaun'){ for(const dx of [-4,0,4]) out.push({x:cx+dx,y:H+1,z:cz+11,t:T.HOLZ}); }
+  if(kind==='zaun'){ for(const dx of [-2,0,2]) out.push({x:cx+dx,y:H+1,z:cz+7,t:T.HOLZ}); }
   if(kind==='iglu'){ for(const [ix,iz,r] of IGLU_POS(v)) out.push({x:ix+r+1,y:H+1,z:iz,t:T.LAMPE}); }
   return out; }
 const LOLLI_GAPS=[[4,0],[-4,0],[0,4],[3,-2],[-3,2]];
