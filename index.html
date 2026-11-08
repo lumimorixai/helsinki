@@ -65,6 +65,7 @@
   #modeSeg button{border:0;background:transparent;border-radius:22px;padding:4px 12px;font:inherit;font-size:20px;line-height:1;display:flex;flex-direction:column;align-items:center;gap:1px;color:#6b4f8a;min-width:64px;touch-action:manipulation}
   #modeSeg button small{font-size:10px;font-weight:700}
   .ico{display:inline-flex;width:1em;height:1em;vertical-align:-0.15em} .ico svg{width:100%;height:100%;display:block}
+  #logo{display:flex;align-items:center;justify-content:center;gap:12px;margin:2px 0 4px} #logo img{width:64px;height:64px;border-radius:18px;box-shadow:0 6px 16px rgba(120,80,160,.25)} #logo h1{margin:0;font-size:30px;line-height:1.05;text-align:left;background:linear-gradient(90deg,#a05fd0,#ff5e9e);-webkit-background-clip:text;background-clip:text;color:transparent} #logo h1 span{display:block;font-size:22px;letter-spacing:.04em}
   .ico.hp{color:#ff4d6d} .ico.hp.off{color:#c9b8d8} #cicon .ico,.gicon .ico{width:1.1em;height:1.1em} #pname .ico{color:#a05fd0} .stars .ico{color:#f2b800} .ico.inl{color:#8a5fb0;width:1.05em;height:1.05em}
   #modeSeg button .ico{width:24px;height:24px} #modeSeg button .lbl{font-size:10px;font-weight:700}
   .btn.round .ico,#flyBtn .ico,#jump .ico,#down .ico,#bUndo .ico{width:1.1em;height:1.1em}
@@ -197,8 +198,8 @@
 <div id="start" class="overlay hidden">
   <div class="card">
     <button class="xbtn hidden" id="startX" title="Schließen">✕</button>
-    <h1>Einhorn-Blockwelt</h1>
-    <div id="verLabel" style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 11.0</div>
+    <div id="logo"><img src="icon-192.png" alt=""><h1>Einhorn-<span>Blockwelt</span></h1></div>
+    <div id="verLabel" style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 11.1</div>
     <p>Eine riesige Zauberwelt voller Dörfer, Ponys, Sterne und Geheimnisse. Lerne Zaubersprüche, baue, flieg – und finde den Schatz! 🌟</p>
     <input id="nameIn" maxlength="16" placeholder="Wie heißt dein Einhorn?" value="" autocomplete="off">
     <div class="lbl">Fellfarbe</div><div class="swatches" id="swatches"></div>
@@ -286,14 +287,14 @@ const isWater=t=>t===T.WASSER;
 // ================= Texture atlas =================
 const TILE_NAMES=['white','grass_top','grass_side','dirt','stone','sand','snow','snow_side','wood','wood_top','watte','leaf_purple','leaf_white','cloud','gold','heart','lamp','glass','ice','hupf','glitzer','kristall','diamant','plank','roof','cobble','water','tuft','mushroom','rainbow','flower0','flower1','flower2','flower3','flower4','flower5','bed','bed_side','leaf_green','leaf_fir','birch','table_side','chair_top','chair_side','chest_top','chest_side','door','fence','pot','sapling','heart_dim','heart_lit'];
 const TILE={}; TILE_NAMES.forEach((n,i)=>TILE[n]=i);
-const ATLAS_COLS=8, TS=16, ATLAS_ROWS=Math.ceil(TILE_NAMES.length/ATLAS_COLS);
-function buildAtlas(){
-  const c=document.createElement('canvas'); c.width=ATLAS_COLS*TS; c.height=ATLAS_ROWS*TS; const g=c.getContext('2d');
+const ATLAS_COLS=8, ATS=32, ATLAS_ROWS=Math.ceil(TILE_NAMES.length/ATLAS_COLS);
+function buildAtlas(){ const TS=16; // Kachelfunktionen rechnen in 16er-Koordinaten, gezeichnet wird mit ATS (32 px) und feinerem Rauschen
+  const c=document.createElement('canvas'); c.width=ATLAS_COLS*ATS; c.height=ATLAS_ROWS*ATS; const g=c.getContext('2d'); const SC=ATS/TS;
   let seed=12345; const rnd=()=>{ seed=(seed*1664525+1013904223)>>>0; return seed/4294967296; };
   const hex=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
-  function tile(name,fn){ const i=TILE[name]; const x0=(i%ATLAS_COLS)*TS, y0=Math.floor(i/ATLAS_COLS)*TS; const img=g.createImageData(TS,TS); const d=img.data;
-    const put=(x,y,r,gg,b,a)=>{ if(x<0||y<0||x>=TS||y>=TS) return; const k=(y*TS+x)*4; d[k]=r; d[k+1]=gg; d[k+2]=b; d[k+3]=a==null?255:a; };
-    for(let y=0;y<TS;y++) for(let x=0;x<TS;x++){ const p=fn(x,y,rnd); if(p) put(x,y,p[0],p[1],p[2],p[3]); else put(x,y,0,0,0,0); }
+  function tile(name,fn){ const i=TILE[name]; const x0=(i%ATLAS_COLS)*ATS, y0=Math.floor(i/ATLAS_COLS)*ATS; const img=g.createImageData(ATS,ATS); const d=img.data;
+    const put=(x,y,r,gg,b,a)=>{ if(x<0||y<0||x>=ATS||y>=ATS) return; const k=(y*ATS+x)*4; d[k]=r; d[k+1]=gg; d[k+2]=b; d[k+3]=a==null?255:a; };
+    for(let y=0;y<ATS;y++) for(let x=0;x<ATS;x++){ const p=fn(Math.floor(x/SC),Math.floor(y/SC),rnd); if(p){ const fine=(rnd()-0.5)*7, sub=((x%SC)+(y%SC))*1.2-1.2; put(x,y,p[0]+fine+sub,p[1]+fine+sub,p[2]+fine+sub,p[3]); } else put(x,y,0,0,0,0); }
     g.putImageData(img,x0,y0); }
   const noisy=(base,amp)=>(x,y,r)=>{ const v=(r()-0.5)*amp; return [base[0]+v,base[1]+v,base[2]+v]; };
   const border=(p,x,y,dark)=>(x===0||y===0||x===TS-1||y===TS-1)?[p[0]*dark,p[1]*dark,p[2]*dark]:p;
