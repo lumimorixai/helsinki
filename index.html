@@ -50,7 +50,7 @@
   #modeSeg button[data-m=remove].sel{background:linear-gradient(135deg,#ffb36b,#ff6f91)}
   #modeSeg button[data-m=explore].sel{background:linear-gradient(135deg,#8ff0d2,#6ec3ff)}
   body:not(.mode-build) #palette{display:none} body.mode-explore #bUndo{display:none}
-  body.lock-spells #bSpell, body.lock-bag #bBag{display:none}
+  body.lock-spells #bSpell, body.lock-bag #bBag{display:none} body.lock-fly #flyBtn{display:none !important}
   #toast{position:fixed;left:50%;bottom:calc(var(--sab) + 132px);transform:translateX(-50%);background:rgba(255,255,255,.93);padding:9px 18px;border-radius:16px;font-weight:800;opacity:0;transition:opacity .3s;box-shadow:0 6px 18px rgba(80,40,120,.2);pointer-events:none;white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis;z-index:5}
   #toast.show{opacity:1}
   #toast.big{background:linear-gradient(135deg,#fff3a0,#ffd1e8);font-size:19px}
@@ -175,7 +175,7 @@
   <div class="card">
     <button class="xbtn hidden" id="startX" title="Schließen">✕</button>
     <h1>Einhorn-Blockwelt</h1>
-    <div id="verLabel" style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 10.0</div>
+    <div id="verLabel" style="font-size:12px;color:#8a7aa8;margin-top:-4px">Version 10.1</div>
     <p>Eine riesige Zauberwelt voller Dörfer, Ponys, Sterne und Geheimnisse. Lerne Zaubersprüche, baue, flieg – und finde den Schatz! 🌟</p>
     <input id="nameIn" maxlength="16" placeholder="Wie heißt dein Einhorn?" value="" autocomplete="off">
     <div class="lbl">Fellfarbe</div><div class="swatches" id="swatches"></div>
@@ -710,7 +710,7 @@ const uni=new THREE.Group(); scene.add(uni); let legs=[],maneCubes=[],tailCubes=
 function overlapsSolid(px,py,pz){ const x0=Math.round(px-P.w),x1=Math.round(px+P.w),y0=Math.round(py),y1=Math.round(py+P.h),z0=Math.round(pz-P.w),z1=Math.round(pz+P.w); for(let x=x0;x<=x1;x++) for(let y=y0;y<=y1;y++) for(let z=z0;z<=z1;z++){ if(!isSolid(get(x,y,z))) continue; if(x+0.5>px-P.w && x-0.5<px+P.w && y+0.5>py && y-0.5<py+P.h && z+0.5>pz-P.w && z-0.5<pz+P.w) return true; } return false; }
 function playerIntersects(bx,by,bz){ return bx+0.5>P.x-P.w && bx-0.5<P.x+P.w && by+0.5>P.y && by-0.5<P.y+P.h && bz+0.5>P.z-P.w && bz-0.5<P.z+P.w; }
 function spawnPlayer(x,z){ x=x==null?0:x; z=z==null?7:z; let r=0, bx=x, bz=z; const free=(a,b)=>{ const h=topY(a,b); if(h<=SEA) return false; for(let y=h+1;y<=h+4;y++) if(get(a,y,b)&&isSolid(get(a,y,b))) return false; return true; }; while(!free(bx,bz)&&r<300){ r++; const rad=Math.ceil(r/8), ang=r*0.9; bx=Math.round(x+Math.cos(ang)*rad); bz=Math.round(z+Math.sin(ang)*rad); } P.x=bx; P.z=bz; P.y=topY(bx,bz)+0.51; P.vx=P.vy=P.vz=0; setFlying(false); }
-function setFlying(v){ if(v) stats.flew=1; P.flying=v; document.body.classList.toggle('flying',v); wings.forEach(w=>w.visible=v||(typeof hasReward==='function'&&hasReward('gp'))); if(v){ sfx('wings'); mission('fly'); } }
+function setFlying(v){ if(v&&typeof has==='function'&&!has('fly')){ if(!setFlying._t||performance.now()-setFlying._t>2500){ setFlying._t=performance.now(); toast('🕊️ Fliegen lernst du bald bei Sternchen – erst die Flugprüfung!'); } return; } if(v) stats.flew=1; P.flying=v; document.body.classList.toggle('flying',v); wings.forEach(w=>w.visible=v||(typeof hasReward==='function'&&hasReward('gp'))); if(v){ sfx('wings'); mission('fly'); } }
 
 // ================= NPCs =================
 const npcs=[]; // {v, def, U, x,y,z, yaw, t, home}
@@ -1184,7 +1184,7 @@ function collectCandy(s){ candyTaken[s.k]=timeAcc; candyDirty=true; addItem('wat
 function tapCandy(nd){ const s=pickNear(nd,activeCandy,s=>({x:s.x,y:(s.gy||height(Math.round(s.x),Math.round(s.z)))+s.yOff,z:s.z}),0.7,14); if(!s) return false; collectCandy(s); return true; }
 // ================= Kapitel-System: Freischaltungen, Dorf-Kette, Leitstern =================
 let unlocked=new Set(); const has=f=>unlocked.has(f);
-const FEATURES={bag:'🎒 Rucksack',craft:'🧪 Zauberkessel',spells:'🪄 Zauber',pets:'🐾 Haustiere',race:'🏁 Windprüfungen',furniture:'🪑 Werkbank & Möbel',home:'🏡 Heimatdorf',night:'🌙 Nacht & Zombies'};
+const FEATURES={bag:'🎒 Rucksack',craft:'🧪 Zauberkessel',spells:'🪄 Zauber',pets:'🐾 Haustiere',race:'🏁 Windprüfungen',furniture:'🪑 Werkbank & Möbel',home:'🏡 Heimatdorf',night:'🌙 Nacht & Zombies',fly:'🕊️ Fliegen'};
 function applyUnlocks(){ const b=document.body; for(const f in FEATURES) b.classList.toggle('lock-'+f,!unlocked.has(f)); }
 function unlock(f,quiet){ if(unlocked.has(f)) return false; unlocked.add(f); applyUnlocks(); if(!quiet){ sfx('fanfare'); toast('🔓 Neu freigeschaltet: '+FEATURES[f],true); } saveSoon(); return true; }
 function unlockAll(){ Object.keys(FEATURES).forEach(f=>unlocked.add(f)); applyUnlocks(); }
@@ -1258,6 +1258,14 @@ function updateSparkles(dt,time){ matGlow.emissiveIntensity=1.6+Math.sin(time*2.
   for(const s of activeStars){ if(Math.abs(s.x-P.x)<40&&Math.abs(s.z-P.z)<40&&Math.random()<0.5) spawn(s.x+(Math.random()-0.5)*0.8,s.y+(Math.random()-0.5)*0.8,s.z+(Math.random()-0.5)*0.8,['#fff3a0','#ffffff'],1,0.2,0.6,0.7,-0.3); }
   if(typeof activeCandy!=='undefined') for(const c of activeCandy){ if(!c.taken&&Math.abs(c.x-P.x)<40&&Math.abs(c.z-P.z)<40&&Math.random()<0.4) spawn(c.x+(Math.random()-0.5)*0.8,c.y+(Math.random()-0.5)*0.8,c.z+(Math.random()-0.5)*0.8,['#ffb6dc','#ffffff'],1,0.2,0.5,0.7,-0.3); }
   const v=storyTargetVillage(); if(v&&Math.abs(v.cx-P.x)<60&&Math.abs(v.cz-P.z)<60){ spawn(v.cx+(Math.random()-0.5)*1.2,v.h+5.5+(Math.random()-0.5)*1.2,v.cz+(Math.random()-0.5)*1.2,['#ff9ec4','#fff3a0','#ffffff'],2,0.4,1.2,1.0,-0.4); } }
+
+// ================= Flugprüfung (Tutorial): 3 Ringe über Sternendorf =================
+const FT={on:false,rings:[],idx:0,done:false};
+function startFlightTest(){ if(FT.on||stats.flightTest) return; unlock('fly',true); const v=storyVillage(0); const H=v.h; const pts=[[v.cx+9,H+5,v.cz+2],[v.cx+2,H+8,v.cz-10],[v.cx-9,H+11,v.cz+1],[v.cx,H+13,v.cz+10]]; FT.rings=pts.map(([x,y,z],i)=>{ const m=new THREE.Mesh(ringGeo,new THREE.MeshLambertMaterial({color:RAINBOW[i%7],emissive:new THREE.Color(RAINBOW[i%7]),emissiveIntensity:0.6,transparent:true,opacity:0.95})); m.position.set(x,y,z); m.lookAt(v.cx,y,v.cz); scene.add(m); const lab=labelSprite(String(i+1),RAINBOW[i%7]); lab.position.set(x,y+2.6,z); scene.add(lab); return {m,lab,x,y,z}; }); FT.idx=0; FT.on=true;
+  dialog('🕊️ Deine Flugprüfung!',`<p style="text-align:center">Sternchen: „Du bist so weit, ${esc(uniName)}! Spür mal – da wachsen dir <b>Flügel</b>!“</p><p>Tipp auf <b>🕊️</b>${isTouch?'':' (oder Taste G)'} und flieg durch die <b>4 Ringe</b> über dem Dorf – einer nach dem anderen. ${isTouch?'Mit ⬆️ steigst du':'Mit der Leertaste steigst du'}, oder schau nach oben und flieg vorwärts.</p><p style="text-align:center;font-size:14px">Der Kompass oben zeigt immer zum nächsten Ring.</p>`,[['Flügel ausprobieren! 🕊️',null]]); }
+function ftTarget(){ const r=FT.rings[FT.idx]; return r?{x:r.x,y:r.y,z:r.z}:null; }
+function updateFlightTest(dt,time){ if(!FT.on) return; FT.rings.forEach((r,i)=>{ r.m.rotation.z=time*(i===FT.idx?3:0.8); const sc=i===FT.idx?1.15+Math.sin(time*6)*0.1:0.8; r.m.scale.setScalar(sc); r.m.material.opacity=i<FT.idx?0:(i===FT.idx?1:0.5); r.m.visible=i>=FT.idx; if(r.lab) r.lab.visible=i>=FT.idx; });
+  const r=FT.rings[FT.idx]; if(!r) return; if(Math.hypot(r.x-P.x,r.y-(P.y+1),r.z-P.z)<2.6){ scene.remove(r.m); if(r.lab) scene.remove(r.lab); FT.idx++; sfx('star'); spawn(r.x,r.y,r.z,RAINBOW,30,2,2,1); if(FT.idx>=FT.rings.length){ FT.on=false; stats.flightTest=1; sfx('fanfare'); toast('🕊️ Flugprüfung bestanden – du kannst fliegen!',true); } else toast(`Ring ${FT.idx} ✅ – noch ${FT.rings.length-FT.idx}`); } }
 // ================= Audio =================
 let actx=null, musicTimer=null, masterGain=null, musicOn=true;
 function audio(){ if(!actx){ actx=new (window.AudioContext||window.webkitAudioContext)(); masterGain=actx.createGain(); masterGain.gain.value=0.9; masterGain.connect(actx.destination); } if(actx.state==='suspended') actx.resume(); return actx; }
@@ -1356,7 +1364,7 @@ function openSettings(){ tileMenu('Einstellungen',[
   ['🦄','Einhorn ändern',()=>{ renderOutfits(); document.getElementById('startX').classList.remove('hidden'); document.getElementById('start').classList.remove('hidden'); }],
   ['🏠','Nach Hause',()=>teleportTo(0,7)],
   ['📲','Als App',installDialog],['⛶','Vollbild',goFullscreen],['🌍','Welt teilen',shareDialog],
-  ['🎓',tutorial<TUT.length?'Tutorial überspringen':'Tutorial nochmal',()=>{ if(tutorial<TUT.length){ tutorial=TUT.length; tutBadge(); buildUnicorn(uniColor,hornColor); save(); toast('Tutorial übersprungen – viel Spaß!'); } else { teleportTo(0,7); setTimeout(()=>{ stats.metSternchen=0; stats.castBluehen=0; introStory(); },2500); } }],
+  ['🎓',tutorial<TUT.length?'Tutorial überspringen':'Tutorial nochmal',()=>{ if(tutorial<TUT.length){ tutorial=TUT.length; tutBadge(); buildUnicorn(uniColor,hornColor); unlock('fly',true); if(FT.on){ FT.rings.forEach(r=>{ scene.remove(r.m); if(r.lab) scene.remove(r.lab); }); FT.on=false; } save(); toast('Tutorial übersprungen – viel Spaß!'); } else { teleportTo(0,7); setTimeout(()=>{ stats.metSternchen=0; stats.castBluehen=0; stats.flightTest=0; stats.mined=0; introStory(); },2500); } }],
   ['🔄','Alles neu',()=>dialog('Wirklich alles neu?','<p>Alle Bauten, Sterne, Missionen und Zauber werden gelöscht.</p>',[['Nein, behalten',null],['Ja, ganz neu',hardReset]])]
 ],openMenu); }
 // palette
@@ -1406,13 +1414,13 @@ const TUT=[
   {t:'Zaubere! Tipp oben rechts auf 🪄 und wähle 🌸 Blühen.', check:()=>!!stats.castBluehen},
   {t:'Abbauen: Tipp unten auf ⛏️ Abbauen und baue 3 Blöcke ab (z. B. Erde oder Holz). Alles landet im Rucksack.', check:()=>(stats.mined||0)>=3},
   {t:'Bauen: Tipp unten auf 🧱 Bauen, wähle einen Block und tipp auf den Boden. (↩️ macht es rückgängig)', check:()=>stats.placed>0},
-  {t:'Flieg! '+(isTouch?'Tipp auf 🕊️.':'Drück die Taste G.')+' Mit '+(isTouch?'⬆️/⬇️':'Leertaste/Shift')+' steigst und sinkst du – oder schau nach oben und flieg vorwärts.', check:()=>!!stats.flew},
+  {t:'Flugprüfung: Tipp auf 🕊️'+(isTouch?'':' (Taste G)')+' und flieg durch die 4 Ringe über dem Dorf – '+(isTouch?'⬆️ = steigen':'Leertaste = steigen')+'. Der Kompass zeigt den nächsten Ring.', enter:startFlightTest, target:ftTarget, check:()=>!!stats.flightTest},
   {t:'Fang einen Stern 🌟 – der Kompass oben zeigt dir den Weg (hinlaufen oder hinfliegen).', check:()=>collected.size>0}
 ];
 let tutShown=-1; const tutStart={x:0,z:0,yaw:0}; let nbCache={t:0,v:null,type:0};
 function nearestBlock(type,rad){ if(performance.now()-nbCache.t<1500 && nbCache.type===type) return nbCache.v; let best=null,bd=1e9; const px=Math.round(P.x),pz=Math.round(P.z); for(let x=px-rad;x<=px+rad;x+=1) for(let z=pz-rad;z<=pz+rad;z+=1){ const d=Math.hypot(x-P.x,z-P.z); if(d>bd) continue; const top=topYData(x,z); for(let y=Math.max(1,top-2);y<=top+3;y++){ if(get(x,y,z)===type){ bd=d; best={x,y,z}; break; } } } nbCache={t:performance.now(),v:best,type}; return best; }
 function tutBadge(){ const el=document.getElementById('tut'); if(tutorial>=TUT.length){ el.classList.add('hidden'); return; } el.classList.remove('hidden'); el.innerHTML=`<b>Schritt ${tutorial+1}/${TUT.length}:</b> ${TUT[tutorial].t}`; }
-function tutorialTick(){ if(tutorial>=TUT.length){ document.getElementById('tut').classList.add('hidden'); return; } if(tutShown!==tutorial){ tutShown=tutorial; tutBadge(); } if(TUT[tutorial].check()){ sfx('mission'); spawn(P.x,P.y+1.5,P.z,['#fff3a0','#ffffff'],25,2,2,0.8); tutorial++; saveSoon(); if(tutorial>=TUT.length){ tutBadge(); setTimeout(tutorialDone,600); } else { toast('✅ Geschafft! Nächster Schritt …'); setTimeout(()=>{ tutShown=-1; tutorialTick(); },1200); } } }
+function tutorialTick(){ if(tutorial>=TUT.length){ document.getElementById('tut').classList.add('hidden'); return; } if(tutShown!==tutorial){ tutShown=tutorial; tutBadge(); if(TUT[tutorial].enter) setTimeout(TUT[tutorial].enter,400); } if(TUT[tutorial].check()){ sfx('mission'); spawn(P.x,P.y+1.5,P.z,['#fff3a0','#ffffff'],25,2,2,0.8); tutorial++; saveSoon(); if(tutorial>=TUT.length){ tutBadge(); setTimeout(tutorialDone,600); } else { toast('✅ Geschafft! Nächster Schritt …'); setTimeout(()=>{ tutShown=-1; tutorialTick(); },1200); } } }
 function tutorialDone(){ sfx('fanfare'); buildUnicorn(uniColor,hornColor); spawn(P.x,P.y+1,P.z,['#ffffff','#fff3a0','#ffd1e8'],80,3,4,1.5); toast('🦄 Du bist gewachsen – kein Baby mehr!',true); for(let i=0;i<4;i++) setTimeout(()=>spawn(P.x,P.y+2,P.z,RAINBOW,60,6,6,1.5),i*200); const nxt=storyTargetVillage(); const ns=nxt?nxt.story:null; dialog('🎉 Kapitel 1 geschafft!',`<p style="text-align:center">Du kennst jetzt alles Wichtige, ${esc(uniName)} – und schau dich an: Aus dem Baby ist ein richtiges Einhorn geworden! 🦄</p><p style="font-size:14px">Mähne, Schweif, Horn und Hufe werden bunt, wenn du Missionen 📜 schaffst (3 · 6 · 9 · 13).</p>${ns?`<p><b>🎯 Kapitel 2:</b> Bring das Licht nach ${ns.e} <b>${esc(nxt.name)}</b>.<br><small>${esc(ns.desc)}</small></p><p style="font-size:14px">Folge dem <b>Leitstern</b> ✨ – er fliegt vor dir her. Oder nimm den Sandweg aus dem Dorf. Dort wartet ${esc(ns.mayor)} 🎩 mit drei Aufgaben.</p>`:''}`,[['Los geht\'s! ✨',null]]); }
 function introStory(){ dialog('🌈 Es war einmal …',`<p style="text-align:center;font-size:40px;margin:2px">💗</p><p>In jedem Dorf leuchtete einst ein <b>Herzkristall</b>. Sein Licht machte die Wiesen bunt, die Bäume süß und die Einhörner fröhlich. Der Wind trug das Licht von Dorf zu Dorf.</p><p>Doch die Einhörner vergaßen ihre Zauber – und ein Kristall nach dem anderen <b>erlosch</b>. Jetzt ist die Welt blass, die Tiere sind scheu, und nachts wird es dunkel und gefährlich.</p>`,[['Weiter ➜',()=>setTimeout(introYou,80)]]); }
 function introYou(){ dialog('🦄 Das bist du',`<p style="text-align:center;font-size:40px;margin:2px">🍼</p><p>Du bist <b>${esc(uniName)}</b>, ein kleines Baby‑Einhorn aus <b>⭐ Sternendorf</b>. Noch ohne bunte Mähne, ohne Flügelglanz – aber mit einem großen Herzen.</p><p>Sternchen 🎩, die Bürgermeisterin, glaubt an dich: <i>„Du bist es, die das Licht zurückbringt!“</i></p>`,[['Weiter ➜',()=>setTimeout(introGoal,80)]]); }
@@ -1496,8 +1504,8 @@ function loop(){ requestAnimationFrame(loop); const now=performance.now(); const
   }
   updateStars(timeAcc); updateCandy(timeAcc); updateParts(dt); updateWeather(dt,timeAcc); updateLamps(dt);
   window.__st={x:P.x,y:P.y,z:P.z,fly:P.flying,g:P.onGround,live,dt,edits:edits.size,stars:collected.size,candy:activeCandy.length,done:[...done],tut:tutorial,loading:loadingWorld,chunks:chunks.size,npcs:npcs.length,spells:[...spells],inv};
-  if(location.hash==='#dev'&&!window.__dev) window.__dev={tp:(x,y,z)=>{P.x=x;P.y=y;P.z=z;P.vx=P.vy=P.vz=0;},cam:(y,p,d)=>{camYaw=y;camPitch=p;if(d)camDist=d;},fly:v=>setFlying(v),mission,setWeather,setNight:v=>setNightQuick(v),openChest,get,height,race:RACE,startRace,raceMenu,COURSES,get rd(){return raceData;},applyRewards,setFX,fxOff:()=>{fxLowT=-1e9;},talkNpc,dayRecap,get npcs(){return npcs;},skipTut:()=>{tutorial=TUT.length;tutBadge();buildUnicorn(uniColor,hornColor);},village,villagesNear,npcs,talkNpc,castSpell,spells,inv,addItem,teleportTo,CAVE,dayTime:v=>{dayTime=v;},renderer,sun,scene,camera,zombies,hurt,sleepInBed,get hp(){return hp;},setZombie:v=>{zombieMode=v;updateHearts();},pets,wild,makePet,spawnWild,chests,lightVillage,village};
-  updateGuide(dt,timeAcc); updateDayCycle(); updateSparkles(dt,timeAcc); fxTime.value=timeAcc; fxWatch(rawDt); renderFrame(); }
+  if(location.hash==='#dev'&&!window.__dev) window.__dev={tp:(x,y,z)=>{P.x=x;P.y=y;P.z=z;P.vx=P.vy=P.vz=0;},cam:(y,p,d)=>{camYaw=y;camPitch=p;if(d)camDist=d;},fly:v=>setFlying(v),mission,setWeather,setNight:v=>setNightQuick(v),openChest,get,height,race:RACE,startRace,raceMenu,COURSES,get rd(){return raceData;},applyRewards,setFX,fxOff:()=>{fxLowT=-1e9;},talkNpc,dayRecap,startFlightTest,get ft(){return FT;},setTut:n=>{tutorial=n;tutShown=-1;},get npcs(){return npcs;},skipTut:()=>{tutorial=TUT.length;tutBadge();buildUnicorn(uniColor,hornColor);unlock('fly',true);},village,villagesNear,npcs,talkNpc,castSpell,spells,inv,addItem,teleportTo,CAVE,dayTime:v=>{dayTime=v;},renderer,sun,scene,camera,zombies,hurt,sleepInBed,get hp(){return hp;},setZombie:v=>{zombieMode=v;updateHearts();},pets,wild,makePet,spawnWild,chests,lightVillage,village};
+  updateGuide(dt,timeAcc); updateFlightTest(dt,timeAcc); updateDayCycle(); updateSparkles(dt,timeAcc); fxTime.value=timeAcc; fxWatch(rawDt); renderFrame(); }
 requestAnimationFrame(loop);
 })();
 </script>
